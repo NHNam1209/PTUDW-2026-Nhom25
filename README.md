@@ -1,4 +1,4 @@
-# 🍳 CULINARY BLOG – DỰ ÁN BLOG ẨM THỰC VÀ NẤU ĂN (NHÓM 25)
+# 🍳 CULINARY BLOG (NHÓM 25)
 
 > Hệ thống ứng dụng web chia sẻ, khám phá và quản lý công thức ẩm thực theo chuẩn đặc tả phần mềm **IEEE 830 / ISO/IEC/IEEE 29148:2018 (SRS v1.0.0)**.
 
