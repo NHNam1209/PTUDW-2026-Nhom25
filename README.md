@@ -11,7 +11,7 @@
 | **1** | **2312607** | **Nguyễn Hoài Nam (Trưởng nhóm)** | **namnh.tandt@gmail.com** | [NHNam1209](https://github.com/NHNam1209) | **Team Lead, Backend Core, Auth & Recipe Modules, DevOps & Docker** |
 | 2 | 2312584 | Đỗ Duy Biên | 2312584@dlu.edu.vn | [2312584](https://github.com/2312584) | Backend Categories, Search FTS, Storage & Background Jobs |
 | 3 | 2312676 | Hoàng Thăng Long | 2312676@gmail.com | [2312676-sys](https://github.com/2312676-sys) | Frontend Public Web, Recipe Catalog, SEO & Auth UI |
-| 4 | 2212437 | Trần Chánh Phát | 2212437@dlu.edu.vn | [2212437](https://github.com/2212437) | Frontend Creator Dashboard, Recipe Editor & Admin Management |
+| 4 | 2212437 | Trần Chánh Phát | 2212437@dlu.edu.vn | [TCPhatdlu](https://github.com/TCPhatdlu) | Frontend Creator Dashboard, Recipe Editor & Admin Management |
 
 ---
 
