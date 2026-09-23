@@ -1,0 +1,4 @@
+-- Initialize PostgreSQL extensions for Full-Text Search and Trigram similarity
+CREATE EXTENSION IF NOT EXISTS unaccent;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
