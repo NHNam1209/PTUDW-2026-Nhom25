@@ -4,21 +4,26 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple, Union
 import jwt
-from passlib.context import CryptContext
+import bcrypt
 from app.core.config import settings
 from app.core.exceptions import AppException, UnauthorizedException
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify plain password against hashed password."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify plain password against hashed password using native bcrypt."""
+    try:
+        password_bytes = plain_password.encode("utf-8")[:72]
+        hashed_bytes = hashed_password.encode("utf-8")
+        return bcrypt.checkpw(password_bytes, hashed_bytes)
+    except Exception:
+        return False
 
 
 def get_password_hash(password: str) -> str:
-    """Hash password using bcrypt."""
-    return pwd_context.hash(password)
+    """Hash password using native bcrypt."""
+    password_bytes = password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password_bytes, salt).decode("utf-8")
 
 
 def validate_password_strength(password: str) -> Tuple[bool, Optional[str]]:
