@@ -45,63 +45,63 @@ Ví dụ: `FR-AUTH-001/User Registration`, `FR-RCP-001/Recipe Listing`, `FR-CAT-
 | Mã Đặc Tả | Tên Nhánh Git | Nội dung & Chức năng |
 |---|---|---|
 | `DEVOPS` | `setup/project-infrastructure` | Khởi tạo cấu trúc dự án, Dockerfile, Docker Compose, Nginx, Database Seeding |
-| `FR-AUTH-001` | `FR-AUTH-001/User Registration` | Đăng ký tài khoản mới, mã hóa PBKDF2/Bcrypt, role "Author" mặc định |
-| `FR-AUTH-002` | `FR-AUTH-002/Email Password Login` | Đăng nhập local, chống brute-force lockout, cấp Access & Refresh Token |
-| `FR-AUTH-003` | `FR-AUTH-003/Google OAuth2 Login` | Đăng nhập / đăng ký qua Google OAuth 2.0 Identity Provider |
-| `FR-AUTH-004` | `FR-AUTH-004/Token Refresh Rotation` | Token Rotation, kiểm soát Reuse Attack Detection, cấp cặp token mới |
-| `FR-AUTH-005` | `FR-AUTH-005/User Logout` | Thu hồi refresh token, kết thúc phiên đăng nhập |
-| `FR-AUTH-006` | `FR-AUTH-006/View User Profile` | Endpoint GET /auth/me xem hồ sơ cá nhân |
-| `FR-AUTH-007` | `FR-AUTH-007/Update User Profile` | Endpoint PATCH /auth/me cập nhật display name, avatar, bio |
-| `FR-RCP-001` | `FR-RCP-001/Recipe Listing Pagination` | Danh sách công thức phân trang, lọc theo danh mục/độ khó, sắp xếp linh hoạt |
-| `FR-RCP-002` | `FR-RCP-002/Recipe Detail View` | Chi tiết công thức kèm steps, ingredients, nutrition, images |
-| `FR-RCP-003` | `FR-RCP-003/Create Recipe Draft` | Tạo công thức mới trạng thái Draft, sinh SEO slug tự động |
-| `FR-RCP-004` | `FR-RCP-004/Update Recipe Concurrency` | Cập nhật công thức, Resource-Based Auth & Optimistic Concurrency |
-| `FR-RCP-005` | `FR-RCP-005/Publish Unpublish Recipe` | Xuất bản / Hủy xuất bản (yêu cầu tối thiểu 1 bước và 1 nguyên liệu) |
-| `FR-RCP-006` | `FR-RCP-006/Archive Recipe` | Chuyển công thức sang trạng thái lưu trữ Archived |
-| `FR-RCP-007` | `FR-RCP-007/Delete Recipe Cascade` | Xóa công thức vĩnh viễn, dọn dẹp các tệp ảnh trên MinIO |
-| `FR-RCP-008` | `FR-RCP-008/Recipe Image Management` | Upload ảnh (kiểm tra MIME, magic bytes, 5MB), đặt ảnh chính, xóa ảnh |
-| `FR-RCP-009` | `FR-RCP-009/Recipe Ingredients CRUD` | Thêm, sửa, xóa nguyên liệu của công thức |
-| `FR-RCP-010` | `FR-RCP-010/Recipe Steps CRUD` | Thêm, sửa, xóa và tự động đánh số lại (renumber) các bước thực hiện |
-| `FR-OBS-001` | `FR-OBS-001/Health Check Probes` | Bộ probe /health, /health/live, /health/ready |
+| `FR-AUTH-001` | `FR-AUTH-001/User-Registration` | Đăng ký tài khoản mới, mã hóa PBKDF2/Bcrypt, role "Author" mặc định |
+| `FR-AUTH-002` | `FR-AUTH-002/Email-Password-Login` | Đăng nhập local, chống brute-force lockout, cấp Access & Refresh Token |
+| `FR-AUTH-003` | `FR-AUTH-003/Google-OAuth2-Login` | Đăng nhập / đăng ký qua Google OAuth 2.0 Identity Provider |
+| `FR-AUTH-004` | `FR-AUTH-004/Token-Refresh-Rotation` | Token Rotation, kiểm soát Reuse Attack Detection, cấp cặp token mới |
+| `FR-AUTH-005` | `FR-AUTH-005/User-Logout` | Thu hồi refresh token, kết thúc phiên đăng nhập |
+| `FR-AUTH-006` | `FR-AUTH-006/View-User-Profile` | Endpoint GET /auth/me xem hồ sơ cá nhân |
+| `FR-AUTH-007` | `FR-AUTH-007/Update-User-Profile` | Endpoint PATCH /auth/me cập nhật display name, avatar, bio |
+| `FR-RCP-001` | `FR-RCP-001/Recipe-Listing-Pagination` | Danh sách công thức phân trang, lọc theo danh mục/độ khó, sắp xếp linh hoạt |
+| `FR-RCP-002` | `FR-RCP-002/Recipe-Detail-View` | Chi tiết công thức kèm steps, ingredients, nutrition, images |
+| `FR-RCP-003` | `FR-RCP-003/Create-Recipe-Draft` | Tạo công thức mới trạng thái Draft, sinh SEO slug tự động |
+| `FR-RCP-004` | `FR-RCP-004/Update-Recipe-Concurrency` | Cập nhật công thức, Resource-Based Auth & Optimistic Concurrency |
+| `FR-RCP-005` | `FR-RCP-005/Publish-Unpublish-Recipe` | Xuất bản / Hủy xuất bản (yêu cầu tối thiểu 1 bước và 1 nguyên liệu) |
+| `FR-RCP-006` | `FR-RCP-006/Archive-Recipe` | Chuyển công thức sang trạng thái lưu trữ Archived |
+| `FR-RCP-007` | `FR-RCP-007/Delete-Recipe-Cascade` | Xóa công thức vĩnh viễn, dọn dẹp các tệp ảnh trên MinIO |
+| `FR-RCP-008` | `FR-RCP-008/Recipe-Image-Management` | Upload ảnh (kiểm tra MIME, magic bytes, 5MB), đặt ảnh chính, xóa ảnh |
+| `FR-RCP-009` | `FR-RCP-009/Recipe-Ingredients-CRUD` | Thêm, sửa, xóa nguyên liệu của công thức |
+| `FR-RCP-010` | `FR-RCP-010/Recipe-Steps-CRUD` | Thêm, sửa, xóa và tự động đánh số lại (renumber) các bước thực hiện |
+| `FR-OBS-001` | `FR-OBS-001/Health-Check-Probes` | Bộ probe /health, /health/live, /health/ready |
 
 #### 👤 Đỗ Duy Biên
 | Mã Đặc Tả | Tên Nhánh Git | Nội dung & Chức năng |
 |---|---|---|
-| `FR-CAT-001` | `FR-CAT-001/Category Listing` | API danh sách danh mục kèm thống kê số lượng recipe |
-| `FR-CAT-002` | `FR-CAT-002/Category Detail Recipes` | Chi tiết danh mục và danh sách công thức thuộc danh mục |
-| `FR-CAT-003` | `FR-CAT-003/Admin Create Category` | Tạo danh mục mới dành cho Admin, tự động sinh slug tiếng Việt |
-| `FR-CAT-004` | `FR-CAT-004/Admin Update Category` | Cập nhật thông tin danh mục |
-| `FR-CAT-005` | `FR-CAT-005/Admin Delete Category` | Xóa danh mục (ràng buộc không xóa khi đang có recipes) |
-| `FR-SRCH-001`| `FR-SRCH-001/Full Text Search` | Tìm kiếm toàn văn bản tiếng Việt với `tsvector`, `tsquery` & `unaccent` |
-| `FR-SRCH-002`| `FR-SRCH-002/Filter And Sorting` | Bộ lọc kết hợp đa tiêu chí (độ khó, thời gian, khẩu phần) |
-| `FR-FILE-001`| `FR-FILE-001/MinIO Storage Service` | Module giao tiếp MinIO S3 Object Storage |
-| `FR-JOB-001` | `FR-JOB-001/Welcome Email Job` | Background job gửi email chào mừng người dùng mới |
-| `FR-JOB-002` | `FR-JOB-002/Image Resize Thumbnail` | Tự động tạo ảnh thumbnail và ảnh vừa |
-| `FR-JOB-003` | `FR-JOB-003/Sitemap XML Generation` | Job định kỳ tạo `sitemap.xml` phục vụ SEO |
-| `FR-OBS-002` | `FR-OBS-002/Structured Logging` | Cấu hình structured log với Correlation-ID và log request |
+| `FR-CAT-001` | `FR-CAT-001/Category-Listing` | API danh sách danh mục kèm thống kê số lượng recipe |
+| `FR-CAT-002` | `FR-CAT-002/Category-Detail-Recipes` | Chi tiết danh mục và danh sách công thức thuộc danh mục |
+| `FR-CAT-003` | `FR-CAT-003/Admin-Create-Category` | Tạo danh mục mới dành cho Admin, tự động sinh slug tiếng Việt |
+| `FR-CAT-004` | `FR-CAT-004/Admin-Update-Category` | Cập nhật thông tin danh mục |
+| `FR-CAT-005` | `FR-CAT-005/Admin-Delete-Category` | Xóa danh mục (ràng buộc không xóa khi đang có recipes) |
+| `FR-SRCH-001`| `FR-SRCH-001/Full-Text-Search` | Tìm kiếm toàn văn bản tiếng Việt với `tsvector`, `tsquery` & `unaccent` |
+| `FR-SRCH-002`| `FR-SRCH-002/Filter-And-Sorting` | Bộ lọc kết hợp đa tiêu chí (độ khó, thời gian, khẩu phần) |
+| `FR-FILE-001`| `FR-FILE-001/MinIO-Storage-Service` | Module giao tiếp MinIO S3 Object Storage |
+| `FR-JOB-001` | `FR-JOB-001/Welcome-Email-Job` | Background job gửi email chào mừng người dùng mới |
+| `FR-JOB-002` | `FR-JOB-002/Image-Resize-Thumbnail` | Tự động tạo ảnh thumbnail và ảnh vừa |
+| `FR-JOB-003` | `FR-JOB-003/Sitemap-XML-Generation` | Job định kỳ tạo `sitemap.xml` phục vụ SEO |
+| `FR-OBS-002` | `FR-OBS-002/Structured-Logging` | Cấu hình structured log với Correlation-ID và log request |
 
 #### 👤 Hoàng Thăng Long
 | Mã Đặc Tả | Tên Nhánh Git | Nội dung & Chức năng |
 |---|---|---|
-| `FR-UI-001` | `FR-UI-001/Public Home Page` | Giao diện Trang chủ: banner, danh mục nổi bật, recipes mới nhất |
-| `FR-UI-002` | `FR-UI-002/Recipe Catalog Page` | Giao diện duyệt danh sách công thức, phân trang, lọc theo tiêu chí |
-| `FR-UI-003` | `FR-UI-003/Recipe Detail View` | Giao diện chi tiết món ăn: nguyên liệu, hướng dẫn từng bước, dinh dưỡng |
-| `FR-UI-004` | `FR-UI-004/Category Pages` | Trang xem công thức theo từng danh mục cụ thể |
-| `FR-UI-005` | `FR-UI-005/Search Results Page` | Giao diện tìm kiếm trực quan có gợi ý và highlight từ khóa |
-| `FR-AUTH-UI-001` | `FR-AUTH-UI-001/Login Page` | Form đăng nhập (Email/Password & Đăng nhập bằng Google) |
-| `FR-AUTH-UI-002` | `FR-AUTH-UI-002/Register Page` | Form đăng ký tài khoản với validation độ mạnh mật khẩu realtime |
-| `FR-AUTH-UI-003` | `FR-AUTH-UI-003/User Profile Page` | Trang xem và cập nhật thông tin tác giả cá nhân |
+| `FR-UI-001` | `FR-UI-001/Public-Home-Page` | Giao diện Trang chủ: banner, danh mục nổi bật, recipes mới nhất |
+| `FR-UI-002` | `FR-UI-002/Recipe-Catalog-Page` | Giao diện duyệt danh sách công thức, phân trang, lọc theo tiêu chí |
+| `FR-UI-003` | `FR-UI-003/Recipe-Detail-View` | Giao diện chi tiết món ăn: nguyên liệu, hướng dẫn từng bước, dinh dưỡng |
+| `FR-UI-004` | `FR-UI-004/Category-Pages` | Trang xem công thức theo từng danh mục cụ thể |
+| `FR-UI-005` | `FR-UI-005/Search-Results-Page` | Giao diện tìm kiếm trực quan có gợi ý và highlight từ khóa |
+| `FR-AUTH-UI-001` | `FR-AUTH-UI-001/Login-Page` | Form đăng nhập (Email/Password & Đăng nhập bằng Google) |
+| `FR-AUTH-UI-002` | `FR-AUTH-UI-002/Register-Page` | Form đăng ký tài khoản với validation độ mạnh mật khẩu realtime |
+| `FR-AUTH-UI-003` | `FR-AUTH-UI-003/User-Profile-Page` | Trang xem và cập nhật thông tin tác giả cá nhân |
 
 #### 👤 Trần Chánh Phát
 | Mã Đặc Tả | Tên Nhánh Git | Nội dung & Chức năng |
 |---|---|---|
-| `FR-DASH-001`| `FR-DASH-001/Creator Dashboard Overview` | Màn hình bảng điều khiển tác giả, thống kê công thức |
-| `FR-DASH-002`| `FR-DASH-002/Recipe Management Table` | Bảng quản lý recipes cá nhân: trạng thái Draft/Published/Archived |
-| `FR-DASH-003`| `FR-DASH-003/Recipe Creation Wizard` | Form tạo mới & cập nhật công thức đa bước (Multi-step Form) |
-| `FR-DASH-004`| `FR-DASH-004/Step And Ingredient Editor`| Bộ công cụ thêm/sửa/xóa nguyên liệu và các bước thực hiện kéo thả |
-| `FR-DASH-005`| `FR-DASH-005/Image Uploader Component` | Component tải ảnh lên MinIO có preview, đặt ảnh bìa và thanh tiến trình |
-| `FR-ADMIN-001`| `FR-ADMIN-001/Admin Category Management` | Màn hình quản lý danh mục dành cho Admin (CRUD modal) |
-| `FR-SEO-001` | `FR-SEO-001/JSON-LD Recipe Schema` | Nhúng dữ liệu có cấu trúc Schema.org Recipe và thẻ Open Graph |
+| `FR-DASH-001`| `FR-DASH-001/Creator-Dashboard-Overview` | Màn hình bảng điều khiển tác giả, thống kê công thức |
+| `FR-DASH-002`| `FR-DASH-002/Recipe-Management-Table` | Bảng quản lý recipes cá nhân: trạng thái Draft/Published/Archived |
+| `FR-DASH-003`| `FR-DASH-003/Recipe-Creation-Wizard` | Form tạo mới & cập nhật công thức đa bước (Multi-step Form) |
+| `FR-DASH-004`| `FR-DASH-004/Step-And-Ingredient-Editor`| Bộ công cụ thêm/sửa/xóa nguyên liệu và các bước thực hiện kéo thả |
+| `FR-DASH-005`| `FR-DASH-005/Image-Uploader-Component` | Component tải ảnh lên MinIO có preview, đặt ảnh bìa và thanh tiến trình |
+| `FR-ADMIN-001`| `FR-ADMIN-001/Admin-Category-Management` | Màn hình quản lý danh mục dành cho Admin (CRUD modal) |
+| `FR-SEO-001` | `FR-SEO-001/JSON-LD-Recipe-Schema` | Nhúng dữ liệu có cấu trúc Schema.org Recipe và thẻ Open Graph |
 
 ---
 
