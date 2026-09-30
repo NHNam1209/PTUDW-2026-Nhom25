@@ -3,10 +3,24 @@ import time
 from typing import Callable
 import uuid
 
-from app.core.exceptions import AppException
 from fastapi import FastAPI, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+
+from app.core.exceptions import AppException
+from app.domain.exceptions import (
+    DomainException,
+    EntityNotFoundException,
+    InvalidRecipeStateException,
+    RecipeConcurrencyException,
+    AccountLockedException,
+    AccountDisabledException,
+    InvalidCredentialsException,
+    TokenReuseDetectedException,
+    DuplicateEmailException,
+    DuplicateUserNameException,
+    ForbiddenDomainException,
+)
 
 logger = logging.getLogger("culinary_blog")
 
@@ -15,13 +29,9 @@ async def correlation_id_middleware(
     request: Request, call_next: Callable
 ) -> Response:
     """FR-OBS-002 / NFR-SEC-006:
-
-    Ensures every request has an X-Correlation-ID header, logs timing and
-    request info.
+    Ensures every request has an X-Correlation-ID header, logs timing and request info.
     """
-    correlation_id = request.headers.get("X-Correlation-ID") or str(
-        uuid.uuid4()
-    )
+    correlation_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
     request.state.correlation_id = correlation_id
 
     start_time = time.time()
@@ -40,13 +50,37 @@ async def correlation_id_middleware(
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    """Registers custom exception handlers that strictly adhere to RFC 7807
-
-    Problem Details.
-
-    Output: { "type": "...", "title": "...", "status": ..., "detail": "...",
-    "errors": {} }
+    """Registers custom exception handlers that strictly adhere to RFC 7807 Problem Details.
+    Output: { "type": "...", "title": "...", "status": ..., "detail": "...", "errors": {} }
     """
+
+    @app.exception_handler(DomainException)
+    async def domain_exception_handler(request: Request, exc: DomainException):
+        status_code = status.HTTP_400_BAD_REQUEST
+        if isinstance(exc, EntityNotFoundException):
+            status_code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exc, (InvalidCredentialsException, TokenReuseDetectedException)):
+            status_code = status.HTTP_401_UNAUTHORIZED
+        elif isinstance(exc, (ForbiddenDomainException, AccountDisabledException)):
+            status_code = status.HTTP_403_FORBIDDEN
+        elif isinstance(exc, AccountLockedException):
+            status_code = status.HTTP_423_LOCKED
+        elif isinstance(exc, (DuplicateEmailException, DuplicateUserNameException)):
+            status_code = status.HTTP_409_CONFLICT
+        elif isinstance(exc, (RecipeConcurrencyException, InvalidRecipeStateException)):
+            status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+        return JSONResponse(
+            status_code=status_code,
+            headers={"Content-Type": "application/problem+json"},
+            content={
+                "type": exc.code,
+                "title": exc.code.replace("_", " ").title(),
+                "status": status_code,
+                "detail": exc.message,
+                "errors": exc.details,
+            },
+        )
 
     @app.exception_handler(AppException)
     async def app_exception_handler(request: Request, exc: AppException):
