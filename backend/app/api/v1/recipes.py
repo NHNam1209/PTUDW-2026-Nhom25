@@ -1,46 +1,50 @@
-import math
 from datetime import datetime, timezone
+import math
 from typing import List, Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, Query, UploadFile, File, Form, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, or_, desc, asc
-from sqlalchemy.orm import selectinload
 
+from app.api.deps import (
+    get_current_user,
+    get_current_user_optional,
+    require_role,
+)
 from app.core.database import get_db
 from app.core.exceptions import (
-    NotFoundException,
-    ForbiddenException,
-    UnauthorizedException,
-    ConflictException,
     BadRequestException,
     ConcurrencyConflictException,
+    ConflictException,
+    ForbiddenException,
+    NotFoundException,
+    UnauthorizedException,
 )
-from app.domain.enums import RecipeStatus, RecipeDifficulty
-from app.domain.models.recipe import Recipe
+from app.domain.enums import RecipeDifficulty, RecipeStatus
 from app.domain.models.category import Category
-from app.domain.models.user import User
-from app.domain.models.recipe_step import RecipeStep
-from app.domain.models.recipe_ingredient import RecipeIngredient
+from app.domain.models.recipe import Recipe
 from app.domain.models.recipe_image import RecipeImage
-from app.schemas.common import PagedResult, PagedMeta
+from app.domain.models.recipe_ingredient import RecipeIngredient
+from app.domain.models.recipe_step import RecipeStep
+from app.domain.models.user import User
+from app.schemas.common import PagedMeta, PagedResult
 from app.schemas.recipe import (
-    RecipeSummaryDto,
-    RecipeDetailDto,
-    RecipeCreateDto,
-    RecipeUpdateDto,
-    RecipeStepDto,
-    RecipeStepCreateDto,
-    RecipeIngredientDto,
-    RecipeIngredientCreateDto,
-    RecipeImageDto,
-    RecipeNutritionDto,
     RecipeAuthorDto,
     RecipeCategorySummaryDto,
+    RecipeCreateDto,
+    RecipeDetailDto,
+    RecipeImageDto,
+    RecipeIngredientCreateDto,
+    RecipeIngredientDto,
+    RecipeNutritionDto,
+    RecipeStepCreateDto,
+    RecipeStepDto,
+    RecipeSummaryDto,
+    RecipeUpdateDto,
 )
-from app.api.deps import get_current_user, get_current_user_optional, require_role
 from app.services.slug import get_unique_slug
 from app.services.storage import storage_service
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
+from sqlalchemy import and_, asc, desc, func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 router = APIRouter(prefix="/recipes", tags=["Recipes"])
 
@@ -50,7 +54,7 @@ def _check_recipe_ownership(recipe: Recipe, user: User) -> None:
     if user.role != "Admin" and str(recipe.author_id) != str(user.id):
         raise ForbiddenException(
             error_code="RECIPE_FORBIDDEN",
-            detail="Bạn không có quyền chỉnh sửa hoặc xóa công thức này."
+            detail="Bạn không có quyền chỉnh sửa hoặc xóa công thức này.",
         )
 
 
@@ -59,7 +63,9 @@ def _to_detail_dto(recipe: Recipe) -> RecipeDetailDto:
     if not primary_img and recipe.images:
         primary_img = recipe.images[0]
 
-    primary_img_dto = RecipeImageDto.model_validate(primary_img) if primary_img else None
+    primary_img_dto = (
+        RecipeImageDto.model_validate(primary_img) if primary_img else None
+    )
 
     category_dto = None
     if recipe.category:
@@ -88,7 +94,9 @@ def _to_detail_dto(recipe: Recipe) -> RecipeDetailDto:
     )
 
     steps_dto = [RecipeStepDto.model_validate(s) for s in recipe.steps]
-    ingredients_dto = [RecipeIngredientDto.model_validate(i) for i in recipe.ingredients]
+    ingredients_dto = [
+        RecipeIngredientDto.model_validate(i) for i in recipe.ingredients
+    ]
     images_dto = [RecipeImageDto.model_validate(img) for img in recipe.images]
 
     return RecipeDetailDto(
@@ -122,7 +130,7 @@ def _to_detail_dto(recipe: Recipe) -> RecipeDetailDto:
     "",
     response_model=PagedResult[RecipeSummaryDto],
     status_code=status.HTTP_200_OK,
-    summary="Xem danh sách công thức nấu ăn (FR-RCP-001)"
+    summary="Xem danh sách công thức nấu ăn (FR-RCP-001)",
 )
 async def get_recipes(
     page: int = Query(1, ge=1),
@@ -134,7 +142,7 @@ async def get_recipes(
     mine: bool = Query(False, description="Chỉ trả về công thức của người dùng hiện tại (FR-DASH-002)"),
     sort: str = Query("-createdAt"),
     current_user: Optional[User] = Depends(get_current_user_optional),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -170,8 +178,13 @@ async def get_recipes(
                 Recipe.status == RecipeStatus.Published.value,
                 and_(
                     Recipe.author_id == current_user.id,
-                    Recipe.status.in_([RecipeStatus.Draft.value, RecipeStatus.Archived.value])
-                )
+                    Recipe.status.in_(
+                        [
+                            RecipeStatus.Draft.value,
+                            RecipeStatus.Archived.value,
+                        ]
+                    ),
+                ),
             )
         )
         if recipeStatus is not None:
@@ -209,11 +222,28 @@ async def get_recipes(
 
     items: List[RecipeSummaryDto] = []
     for r in recipes:
-        p_img = next((img for img in r.images if img.is_primary), None) or (r.images[0] if r.images else None)
+        p_img = next(
+            (img for img in r.images if img.is_primary), None
+        ) or (r.images[0] if r.images else None)
         p_img_dto = RecipeImageDto.model_validate(p_img) if p_img else None
 
-        cat_dto = RecipeCategorySummaryDto(id=r.category.id, name=r.category.name, slug=r.category.slug) if r.category else None
-        auth_dto = RecipeAuthorDto(id=r.author.id, fullName=r.author.full_name, userName=r.author.user_name, avatarUrl=r.author.avatar_url) if r.author else None
+        cat_dto = (
+            RecipeCategorySummaryDto(
+                id=r.category.id, name=r.category.name, slug=r.category.slug
+            )
+            if r.category
+            else None
+        )
+        auth_dto = (
+            RecipeAuthorDto(
+                id=r.author.id,
+                fullName=r.author.full_name,
+                userName=r.author.user_name,
+                avatarUrl=r.author.avatar_url,
+            )
+            if r.author
+            else None
+        )
 
         items.append(
             RecipeSummaryDto(
@@ -245,7 +275,7 @@ async def get_recipes(
             totalPages=total_pages,
             hasNextPage=page < total_pages,
             hasPreviousPage=page > 1,
-        )
+        ),
     )
 
 
@@ -256,12 +286,12 @@ async def get_recipes(
     "/{slug_or_id}",
     response_model=RecipeDetailDto,
     status_code=status.HTTP_200_OK,
-    summary="Xem chi tiết công thức nấu ăn (FR-RCP-002)"
+    summary="Xem chi tiết công thức nấu ăn (FR-RCP-002)",
 )
 async def get_recipe_detail(
     slug_or_id: str,
     current_user: Optional[User] = Depends(get_current_user_optional),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -288,7 +318,7 @@ async def get_recipe_detail(
     if not recipe:
         raise NotFoundException(
             error_code="RECIPE_NOT_FOUND",
-            detail=f"Không tìm thấy công thức với định danh '{slug_or_id}'."
+            detail=f"Không tìm thấy công thức với định danh '{slug_or_id}'.",
         )
 
     # Authorization for Draft/Archived
@@ -296,7 +326,7 @@ async def get_recipe_detail(
         if not current_user:
             raise ForbiddenException(
                 error_code="RECIPE_FORBIDDEN",
-                detail="Công thức này chưa được xuất bản. Vui lòng đăng nhập để xem."
+                detail="Công thức này chưa được xuất bản. Vui lòng đăng nhập để xem.",
             )
         _check_recipe_ownership(recipe, current_user)
 
@@ -310,21 +340,23 @@ async def get_recipe_detail(
     "",
     response_model=RecipeDetailDto,
     status_code=status.HTTP_201_CREATED,
-    summary="Tạo công thức mới (FR-RCP-003)"
+    summary="Tạo công thức mới (FR-RCP-003)",
 )
 async def create_recipe(
     req: RecipeCreateDto,
     current_user: User = Depends(require_role(["Author", "Admin"])),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     # Verify category exists
-    cat_stmt = select(Category).where(Category.id == req.categoryId, Category.is_deleted == False)
+    cat_stmt = select(Category).where(
+        Category.id == req.categoryId, Category.is_deleted == False
+    )
     cat_res = await db.execute(cat_stmt)
     category = cat_res.scalar_one_or_none()
     if not category:
         raise BadRequestException(
             error_code="VALIDATION_ERROR",
-            detail="Danh mục (categoryId) không tồn tại."
+            detail="Danh mục (categoryId) không tồn tại.",
         )
 
     # Generate unique slug
@@ -406,13 +438,13 @@ async def create_recipe(
     "/{id}",
     response_model=RecipeDetailDto,
     status_code=status.HTTP_200_OK,
-    summary="Cập nhật thông tin công thức (FR-RCP-004)"
+    summary="Cập nhật thông tin công thức (FR-RCP-004)",
 )
 async def update_recipe(
     id: UUID,
     req: RecipeUpdateDto,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -430,8 +462,7 @@ async def update_recipe(
 
     if not recipe:
         raise NotFoundException(
-            error_code="RECIPE_NOT_FOUND",
-            detail="Công thức không tồn tại."
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
         )
 
     _check_recipe_ownership(recipe, current_user)
@@ -441,17 +472,24 @@ async def update_recipe(
         raise ConcurrencyConflictException()
 
     if req.categoryId:
-        cat_stmt = select(Category).where(Category.id == req.categoryId, Category.is_deleted == False)
+        cat_stmt = select(Category).where(
+            Category.id == req.categoryId, Category.is_deleted == False
+        )
         cat_res = await db.execute(cat_stmt)
         if not cat_res.scalar_one_or_none():
-            raise BadRequestException(error_code="VALIDATION_ERROR", detail="CategoryId không tồn tại.")
+            raise BadRequestException(
+                error_code="VALIDATION_ERROR",
+                detail="CategoryId không tồn tại.",
+            )
         recipe.category_id = req.categoryId
 
     if req.title and req.title != recipe.title:
         recipe.title = req.title
         # Regenerate slug if still draft
         if recipe.status == RecipeStatus.Draft.value:
-            recipe.slug = await get_unique_slug(db, Recipe, req.title, current_id=recipe.id)
+            recipe.slug = await get_unique_slug(
+                db, Recipe, req.title, current_id=recipe.id
+            )
 
     if req.description is not None:
         recipe.description = req.description
@@ -489,12 +527,12 @@ async def update_recipe(
     "/{id}/publish",
     response_model=RecipeDetailDto,
     status_code=status.HTTP_200_OK,
-    summary="Xuất bản công thức (FR-RCP-005)"
+    summary="Xuất bản công thức (FR-RCP-005)",
 )
 async def publish_recipe(
     id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -511,7 +549,9 @@ async def publish_recipe(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
@@ -519,7 +559,7 @@ async def publish_recipe(
     if len(recipe.steps) == 0 or len(recipe.ingredients) == 0:
         raise BadRequestException(
             error_code="RECIPE_PUBLISH_INCOMPLETE",
-            detail="Recipe phải có ít nhất 1 bước thực hiện và 1 nguyên liệu mới có thể xuất bản."
+            detail="Recipe phải có ít nhất 1 bước thực hiện và 1 nguyên liệu mới có thể xuất bản.",
         )
 
     recipe.status = RecipeStatus.Published.value
@@ -535,12 +575,12 @@ async def publish_recipe(
     "/{id}/unpublish",
     response_model=RecipeDetailDto,
     status_code=status.HTTP_200_OK,
-    summary="Hủy xuất bản công thức (FR-RCP-005)"
+    summary="Hủy xuất bản công thức (FR-RCP-005)",
 )
 async def unpublish_recipe(
     id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -557,7 +597,9 @@ async def unpublish_recipe(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
@@ -576,12 +618,12 @@ async def unpublish_recipe(
     "/{id}/archive",
     response_model=RecipeDetailDto,
     status_code=status.HTTP_200_OK,
-    summary="Lưu trữ công thức (FR-RCP-006)"
+    summary="Lưu trữ công thức (FR-RCP-006)",
 )
 async def archive_recipe(
     id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -598,7 +640,9 @@ async def archive_recipe(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
@@ -616,12 +660,12 @@ async def archive_recipe(
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Xóa công thức nấu ăn (FR-RCP-007)"
+    summary="Xóa công thức nấu ăn (FR-RCP-007)",
 )
 async def delete_recipe(
     id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -632,7 +676,9 @@ async def delete_recipe(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
@@ -652,7 +698,7 @@ async def delete_recipe(
     "/{id}/images",
     response_model=RecipeImageDto,
     status_code=status.HTTP_201_CREATED,
-    summary="Upload ảnh công thức (FR-RCP-008)"
+    summary="Upload ảnh công thức (FR-RCP-008)",
 )
 async def upload_recipe_image(
     id: UUID,
@@ -660,7 +706,7 @@ async def upload_recipe_image(
     altText: Optional[str] = Form(None),
     isPrimary: bool = Form(False),
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -671,7 +717,9 @@ async def upload_recipe_image(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
@@ -702,13 +750,13 @@ async def upload_recipe_image(
     "/{id}/images/{image_id}/primary",
     response_model=RecipeImageDto,
     status_code=status.HTTP_200_OK,
-    summary="Đặt ảnh chính cho công thức (FR-RCP-008)"
+    summary="Đặt ảnh chính cho công thức (FR-RCP-008)",
 )
 async def set_primary_image(
     id: UUID,
     image_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -719,7 +767,9 @@ async def set_primary_image(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
@@ -732,7 +782,10 @@ async def set_primary_image(
             img.is_primary = False
 
     if not target_img:
-        raise NotFoundException(error_code="IMAGE_NOT_FOUND", detail="Không tìm thấy ảnh này trong công thức.")
+        raise NotFoundException(
+            error_code="IMAGE_NOT_FOUND",
+            detail="Không tìm thấy ảnh này trong công thức.",
+        )
 
     await db.commit()
     await db.refresh(target_img)
@@ -742,13 +795,13 @@ async def set_primary_image(
 @router.delete(
     "/{id}/images/{image_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Xóa ảnh công thức (FR-RCP-008)"
+    summary="Xóa ảnh công thức (FR-RCP-008)",
 )
 async def delete_recipe_image(
     id: UUID,
     image_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -759,13 +812,17 @@ async def delete_recipe_image(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
     target_img = next((img for img in recipe.images if img.id == image_id), None)
     if not target_img:
-        raise NotFoundException(error_code="IMAGE_NOT_FOUND", detail="Không tìm thấy ảnh.")
+        raise NotFoundException(
+            error_code="IMAGE_NOT_FOUND", detail="Không tìm thấy ảnh."
+        )
 
     was_primary = target_img.is_primary
     file_url = target_img.original_url
@@ -789,13 +846,13 @@ async def delete_recipe_image(
     "/{id}/ingredients",
     response_model=RecipeIngredientDto,
     status_code=status.HTTP_201_CREATED,
-    summary="Thêm nguyên liệu vào công thức (FR-RCP-009)"
+    summary="Thêm nguyên liệu vào công thức (FR-RCP-009)",
 )
 async def add_recipe_ingredient(
     id: UUID,
     req: RecipeIngredientCreateDto,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -806,7 +863,9 @@ async def add_recipe_ingredient(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
@@ -828,30 +887,36 @@ async def add_recipe_ingredient(
     "/{id}/ingredients/{ingredient_id}",
     response_model=RecipeIngredientDto,
     status_code=status.HTTP_200_OK,
-    summary="Cập nhật nguyên liệu (FR-RCP-009)"
+    summary="Cập nhật nguyên liệu (FR-RCP-009)",
 )
 async def update_recipe_ingredient(
     id: UUID,
     ingredient_id: UUID,
     req: RecipeIngredientCreateDto,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Recipe).where(Recipe.id == id, Recipe.is_deleted == False)
     res = await db.execute(stmt)
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
-    stmt_ing = select(RecipeIngredient).where(RecipeIngredient.id == ingredient_id, RecipeIngredient.recipe_id == id)
+    stmt_ing = select(RecipeIngredient).where(
+        RecipeIngredient.id == ingredient_id, RecipeIngredient.recipe_id == id
+    )
     res_ing = await db.execute(stmt_ing)
     ing = res_ing.scalar_one_or_none()
 
     if not ing:
-        raise NotFoundException(error_code="INGREDIENT_NOT_FOUND", detail="Không tìm thấy nguyên liệu.")
+        raise NotFoundException(
+            error_code="INGREDIENT_NOT_FOUND", detail="Không tìm thấy nguyên liệu."
+        )
 
     ing.name = req.name
     ing.quantity = req.quantity
@@ -867,29 +932,35 @@ async def update_recipe_ingredient(
 @router.delete(
     "/{id}/ingredients/{ingredient_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Xóa nguyên liệu (FR-RCP-009)"
+    summary="Xóa nguyên liệu (FR-RCP-009)",
 )
 async def delete_recipe_ingredient(
     id: UUID,
     ingredient_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Recipe).where(Recipe.id == id, Recipe.is_deleted == False)
     res = await db.execute(stmt)
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
-    stmt_ing = select(RecipeIngredient).where(RecipeIngredient.id == ingredient_id, RecipeIngredient.recipe_id == id)
+    stmt_ing = select(RecipeIngredient).where(
+        RecipeIngredient.id == ingredient_id, RecipeIngredient.recipe_id == id
+    )
     res_ing = await db.execute(stmt_ing)
     ing = res_ing.scalar_one_or_none()
 
     if not ing:
-        raise NotFoundException(error_code="INGREDIENT_NOT_FOUND", detail="Không tìm thấy nguyên liệu.")
+        raise NotFoundException(
+            error_code="INGREDIENT_NOT_FOUND", detail="Không tìm thấy nguyên liệu."
+        )
 
     await db.delete(ing)
     await db.commit()
@@ -903,13 +974,13 @@ async def delete_recipe_ingredient(
     "/{id}/steps",
     response_model=RecipeStepDto,
     status_code=status.HTTP_201_CREATED,
-    summary="Thêm bước thực hiện (FR-RCP-010)"
+    summary="Thêm bước thực hiện (FR-RCP-010)",
 )
 async def add_recipe_step(
     id: UUID,
     req: RecipeStepCreateDto,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -920,7 +991,9 @@ async def add_recipe_step(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
@@ -945,30 +1018,36 @@ async def add_recipe_step(
     "/{id}/steps/{step_id}",
     response_model=RecipeStepDto,
     status_code=status.HTTP_200_OK,
-    summary="Cập nhật bước thực hiện (FR-RCP-010)"
+    summary="Cập nhật bước thực hiện (FR-RCP-010)",
 )
 async def update_recipe_step(
     id: UUID,
     step_id: UUID,
     req: RecipeStepCreateDto,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Recipe).where(Recipe.id == id, Recipe.is_deleted == False)
     res = await db.execute(stmt)
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
-    stmt_step = select(RecipeStep).where(RecipeStep.id == step_id, RecipeStep.recipe_id == id)
+    stmt_step = select(RecipeStep).where(
+        RecipeStep.id == step_id, RecipeStep.recipe_id == id
+    )
     res_step = await db.execute(stmt_step)
     step = res_step.scalar_one_or_none()
 
     if not step:
-        raise NotFoundException(error_code="STEP_NOT_FOUND", detail="Không tìm thấy bước này.")
+        raise NotFoundException(
+            error_code="STEP_NOT_FOUND", detail="Không tìm thấy bước này."
+        )
 
     step.title = req.title
     step.description = req.description
@@ -984,13 +1063,13 @@ async def update_recipe_step(
 @router.delete(
     "/{id}/steps/{step_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Xóa bước thực hiện và renumber (FR-RCP-010)"
+    summary="Xóa bước thực hiện và renumber (FR-RCP-010)",
 )
 async def delete_recipe_step(
     id: UUID,
     step_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     stmt = (
         select(Recipe)
@@ -1001,20 +1080,23 @@ async def delete_recipe_step(
     recipe = res.scalar_one_or_none()
 
     if not recipe:
-        raise NotFoundException(error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại.")
+        raise NotFoundException(
+            error_code="RECIPE_NOT_FOUND", detail="Công thức không tồn tại."
+        )
 
     _check_recipe_ownership(recipe, current_user)
 
     target_step = next((s for s in recipe.steps if s.id == step_id), None)
     if not target_step:
-        raise NotFoundException(error_code="STEP_NOT_FOUND", detail="Không tìm thấy bước cần xóa.")
+        raise NotFoundException(
+            error_code="STEP_NOT_FOUND", detail="Không tìm thấy bước cần xóa."
+        )
 
     await db.delete(target_step)
 
     # Renumber remaining steps consecutively (1, 2, 3...) as required in FR-RCP-010
     remaining_steps = sorted(
-        [s for s in recipe.steps if s.id != step_id],
-        key=lambda x: x.step_number
+        [s for s in recipe.steps if s.id != step_id], key=lambda x: x.step_number
     )
     for idx, s in enumerate(remaining_steps, 1):
         s.step_number = idx

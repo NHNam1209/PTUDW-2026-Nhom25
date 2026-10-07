@@ -1,18 +1,34 @@
-import time
-import uuid
 import logging
+import time
 from typing import Callable
+import uuid
+
 from fastapi import FastAPI, Request, Response, status
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
 from app.core.exceptions import AppException
+from app.domain.exceptions import (
+    DomainException,
+    EntityNotFoundException,
+    InvalidRecipeStateException,
+    RecipeConcurrencyException,
+    AccountLockedException,
+    AccountDisabledException,
+    InvalidCredentialsException,
+    TokenReuseDetectedException,
+    DuplicateEmailException,
+    DuplicateUserNameException,
+    ForbiddenDomainException,
+)
 
 logger = logging.getLogger("culinary_blog")
 
 
-async def correlation_id_middleware(request: Request, call_next: Callable) -> Response:
-    """
-    FR-OBS-002 / NFR-SEC-006:
+async def correlation_id_middleware(
+    request: Request, call_next: Callable
+) -> Response:
+    """FR-OBS-002 / NFR-SEC-006:
     Ensures every request has an X-Correlation-ID header, logs timing and request info.
     """
     correlation_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
@@ -34,10 +50,38 @@ async def correlation_id_middleware(request: Request, call_next: Callable) -> Re
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    """
-    Registers custom exception handlers that strictly adhere to RFC 7807 Problem Details.
+    """Registers custom exception handlers that strictly adhere to RFC 7807 Problem Details.
     Output: { "type": "...", "title": "...", "status": ..., "detail": "...", "errors": {} }
     """
+
+    @app.exception_handler(DomainException)
+    async def domain_exception_handler(request: Request, exc: DomainException):
+        status_code = status.HTTP_400_BAD_REQUEST
+        if isinstance(exc, EntityNotFoundException):
+            status_code = status.HTTP_404_NOT_FOUND
+        elif isinstance(exc, (InvalidCredentialsException, TokenReuseDetectedException)):
+            status_code = status.HTTP_401_UNAUTHORIZED
+        elif isinstance(exc, (ForbiddenDomainException, AccountDisabledException)):
+            status_code = status.HTTP_403_FORBIDDEN
+        elif isinstance(exc, AccountLockedException):
+            status_code = status.HTTP_423_LOCKED
+        elif isinstance(exc, (DuplicateEmailException, DuplicateUserNameException)):
+            status_code = status.HTTP_409_CONFLICT
+        elif isinstance(exc, (RecipeConcurrencyException, InvalidRecipeStateException)):
+            status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+        return JSONResponse(
+            status_code=status_code,
+            headers={"Content-Type": "application/problem+json"},
+            content={
+                "type": exc.code,
+                "title": exc.code.replace("_", " ").title(),
+                "status": status_code,
+                "detail": exc.message,
+                "errors": exc.details,
+            },
+        )
+
     @app.exception_handler(AppException)
     async def app_exception_handler(request: Request, exc: AppException):
         return JSONResponse(
@@ -49,11 +93,13 @@ def register_exception_handlers(app: FastAPI) -> None:
                 "status": exc.status_code,
                 "detail": exc.detail,
                 "errors": exc.errors,
-            }
+            },
         )
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
         errors = {}
         for err in exc.errors():
             loc = ".".join(str(item) for item in err["loc"] if item != "body")
@@ -71,13 +117,16 @@ def register_exception_handlers(app: FastAPI) -> None:
                 "status": status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "detail": "Dữ liệu yêu cầu không hợp lệ.",
                 "errors": errors,
-            }
+            },
         )
 
     @app.exception_handler(Exception)
     async def general_exception_handler(request: Request, exc: Exception):
         correlation_id = getattr(request.state, "correlation_id", "unknown")
-        logger.error(f"Unhandled Exception (CorrelationID: {correlation_id}): {str(exc)}", exc_info=True)
+        logger.error(
+            f"Unhandled Exception (CorrelationID: {correlation_id}): {str(exc)}",
+            exc_info=True,
+        )
 
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -88,5 +137,5 @@ def register_exception_handlers(app: FastAPI) -> None:
                 "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "detail": "Đã xảy ra lỗi trong quá trình xử lý yêu cầu. Vui lòng thử lại sau.",
                 "errors": {},
-            }
+            },
         )
