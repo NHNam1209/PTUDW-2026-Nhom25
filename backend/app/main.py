@@ -9,6 +9,7 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.recipes import router as recipes_router
 from app.api.v1.categories import router as categories_router
 from app.api.v1.health import router as health_router
+from app.api.v1.dashboard import router as dashboard_router
 
 # Configure logging
 logging.basicConfig(
@@ -61,6 +62,7 @@ app.include_router(health_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(recipes_router, prefix=settings.API_V1_STR)
 app.include_router(categories_router, prefix=settings.API_V1_STR)
+app.include_router(dashboard_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["Root"])
