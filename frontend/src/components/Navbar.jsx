@@ -9,6 +9,7 @@ import {
   LogOut,
   LayoutDashboard,
   FolderTree,
+  FileText,
   Menu,
   X,
 } from 'lucide-react';
@@ -152,6 +153,11 @@ export const Navbar = () => {
                     <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', fontSize: '0.8125rem', borderRadius: '0.375rem' }} className="menu-item">
                       <LayoutDashboard size={15} />
                       <span>Bảng điều khiển</span>
+                    </Link>
+
+                    <Link to="/dashboard/recipes" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', fontSize: '0.8125rem', borderRadius: '0.375rem' }} className="menu-item">
+                      <FileText size={15} />
+                      <span>Quản lý công thức</span>
                     </Link>
 
                     {isAdmin && (
