@@ -15,6 +15,7 @@ from app.core.exceptions import (
     ConflictException,
     ForbiddenException,
     NotFoundException,
+    UnauthorizedException,
 )
 from app.domain.enums import RecipeDifficulty, RecipeStatus
 from app.domain.models.category import Category
@@ -137,6 +138,8 @@ async def get_recipes(
     categoryId: Optional[UUID] = Query(None),
     difficulty: Optional[int] = Query(None, ge=1, le=4),
     maxCookTime: Optional[int] = Query(None, ge=0),
+    recipeStatus: Optional[int] = Query(None, ge=0, le=2, description="Lọc theo trạng thái: 0=Draft, 1=Published, 2=Archived"),
+    mine: bool = Query(False, description="Chỉ trả về công thức của người dùng hiện tại (FR-DASH-002)"),
     sort: str = Query("-createdAt"),
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
@@ -152,10 +155,22 @@ async def get_recipes(
     )
 
     # 1. Authorization filter
-    if not current_user:
+    if mine:
+        # FR-DASH-002: management table shows ONLY the current user's recipes
+        if not current_user:
+            raise UnauthorizedException(
+                error_code="AUTH_TOKEN_INVALID",
+                detail="Vui lòng đăng nhập để xem công thức của bạn."
+            )
+        stmt = stmt.where(Recipe.author_id == current_user.id)
+        if recipeStatus is not None:
+            stmt = stmt.where(Recipe.status == recipeStatus)
+    elif not current_user:
         stmt = stmt.where(Recipe.status == RecipeStatus.Published.value)
     elif current_user.role == "Admin":
-        pass  # Admin sees all statuses
+        # Admin sees all statuses
+        if recipeStatus is not None:
+            stmt = stmt.where(Recipe.status == recipeStatus)
     else:
         # Author sees published + their own drafts/archived
         stmt = stmt.where(
@@ -172,6 +187,8 @@ async def get_recipes(
                 ),
             )
         )
+        if recipeStatus is not None:
+            stmt = stmt.where(Recipe.status == recipeStatus)
 
     # 2. Filters
     if categoryId:

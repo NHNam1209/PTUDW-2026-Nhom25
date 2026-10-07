@@ -12,6 +12,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { CreatorDashboard } from './pages/CreatorDashboard';
+import { RecipeManagementPage } from './pages/RecipeManagementPage';
 import { RecipeEditorPage } from './pages/RecipeEditorPage';
 import { CategoryManagePage } from './pages/CategoryManagePage';
 
@@ -64,6 +65,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreatorDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/recipes"
+                element={
+                  <ProtectedRoute>
+                    <RecipeManagementPage />
                   </ProtectedRoute>
                 }
               />
