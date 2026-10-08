@@ -42,7 +42,7 @@ from app.schemas.recipe import (
 from app.services.slug import get_unique_slug
 from app.services.storage import storage_service
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
-from sqlalchemy import and_, asc, desc, func, or_, select
+from sqlalchemy import and_, asc, desc, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -217,6 +217,109 @@ async def get_recipes(
 
     # 5. Pagination
     stmt = stmt.offset((page - 1) * pageSize).limit(pageSize)
+    result = await db.execute(stmt)
+    recipes = result.scalars().all()
+
+    items: List[RecipeSummaryDto] = []
+    for r in recipes:
+        p_img = next(
+            (img for img in r.images if img.is_primary), None
+        ) or (r.images[0] if r.images else None)
+        p_img_dto = RecipeImageDto.model_validate(p_img) if p_img else None
+
+        cat_dto = (
+            RecipeCategorySummaryDto(
+                id=r.category.id, name=r.category.name, slug=r.category.slug
+            )
+            if r.category
+            else None
+        )
+        auth_dto = (
+            RecipeAuthorDto(
+                id=r.author.id,
+                fullName=r.author.full_name,
+                userName=r.author.user_name,
+                avatarUrl=r.author.avatar_url,
+            )
+            if r.author
+            else None
+        )
+
+        items.append(
+            RecipeSummaryDto(
+                id=r.id,
+                title=r.title,
+                slug=r.slug,
+                description=r.description,
+                prepTime=r.prep_time,
+                cookTime=r.cook_time,
+                servings=r.servings,
+                difficulty=r.difficulty,
+                status=r.status,
+                category=cat_dto,
+                author=auth_dto,
+                primaryImage=p_img_dto,
+                publishedAt=r.published_at,
+                createdAt=r.created_at,
+            )
+        )
+
+    total_pages = math.ceil(total_count / pageSize) if total_count > 0 else 0
+
+    return PagedResult(
+        items=items,
+        meta=PagedMeta(
+            page=page,
+            pageSize=pageSize,
+            total=total_count,
+            totalPages=total_pages,
+            hasNextPage=page < total_pages,
+            hasPreviousPage=page > 1,
+        ),
+    )
+
+
+# -------------------------------------------------------------
+# FR-SRCH-001: Tìm kiếm Full-Text PostgreSQL với tsvector / unaccent
+# -------------------------------------------------------------
+@router.get(
+    "/search",
+    response_model=PagedResult[RecipeSummaryDto],
+    status_code=status.HTTP_200_OK,
+    summary="Tìm kiếm công thức nấu ăn Full-Text Search (FR-SRCH-001)",
+)
+async def search_recipes(
+    q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
+    page: int = Query(1, ge=1),
+    pageSize: int = Query(12, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(Recipe)
+        .where(
+            Recipe.is_deleted == False,
+            Recipe.status == RecipeStatus.Published.value,
+            or_(
+                func.to_tsvector("simple", func.unaccent(Recipe.title)).bool_op("@@")(
+                    func.plainto_tsquery("simple", func.unaccent(q))
+                ),
+                func.to_tsvector("simple", func.unaccent(Recipe.description)).bool_op("@@")(
+                    func.plainto_tsquery("simple", func.unaccent(q))
+                ),
+            ),
+        )
+        .options(
+            selectinload(Recipe.category),
+            selectinload(Recipe.author),
+            selectinload(Recipe.images),
+        )
+    )
+
+    count_stmt = select(func.count()).select_from(stmt.subquery())
+    total_res = await db.execute(count_stmt)
+    total_count = total_res.scalar_one()
+
+    stmt = stmt.order_by(desc(Recipe.created_at)).offset((page - 1) * pageSize).limit(pageSize)
     result = await db.execute(stmt)
     recipes = result.scalars().all()
 
