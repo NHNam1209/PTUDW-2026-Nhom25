@@ -259,7 +259,7 @@ async def update_category(
                 detail="Tên danh mục đã tồn tại.",
             )
         cat.name = req.name
-        cat.slug = await get_unique_slug(db, Category, req.name, current_id=cat.id) # <- Bổ sung dòng này
+        cat.slug = await get_unique_slug(db, Category, req.name, current_id=cat.id)
 
     if req.description is not None:
         cat.description = req.description

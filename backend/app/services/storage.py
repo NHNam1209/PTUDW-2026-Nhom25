@@ -4,11 +4,13 @@ import uuid
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 
-from app.core.config import settings
-from app.core.exceptions import BadRequestException
-from fastapi import UploadFile
+from PIL import Image
+from fastapi import UploadFile, BackgroundTasks
 from minio import Minio
 from minio.error import S3Error
+
+from app.core.config import settings
+from app.core.exceptions import BadRequestException
 
 logger = logging.getLogger("culinary_blog.storage")
 
@@ -51,7 +53,6 @@ class MinIOStorageService:
         bucket_name = settings.MINIO_BUCKET_NAME
         if not self.client.bucket_exists(bucket_name):
             self.client.make_bucket(bucket_name)
-            # Public-read policy cho phép đọc ảnh trực tiếp qua URL
             policy = f"""{{
                 "Version": "2012-10-17",
                 "Statement": [
@@ -107,15 +108,54 @@ class MinIOStorageService:
                 detail="Định dạng file không khớp với nội dung thực tế (magic bytes validation failed).",
             )
 
-        # Xác định phần mở rộng đường dẫn (Extension)
         ext = content_type.split("/")[-1]
         if ext == "jpeg":
             ext = "jpg"
 
         return content, ext
 
-    async def upload_file(self, file: UploadFile, folder: str = "recipes") -> str:
-        """Upload file lên MinIO và trả về URL công khai."""
+    def process_and_upload_thumbnail(self, content: bytes, original_object_name: str) -> Optional[str]:
+        """Background Job: Tạo ảnh thumbnail (300x300 px) và tải lên MinIO (FR-JOB-002)."""
+        try:
+            image = Image.open(io.BytesIO(content))
+            image.thumbnail((300, 300))
+
+            if image.mode in ("RGBA", "P"):
+                image = image.convert("RGB")
+
+            thumb_buffer = io.BytesIO()
+            image.save(thumb_buffer, format="JPEG", quality=85)
+            thumb_bytes = thumb_buffer.getvalue()
+
+            path_parts = original_object_name.split("/")
+            folder = path_parts[0] if len(path_parts) > 1 else "recipes"
+            file_name = path_parts[-1]
+            thumb_object_name = f"{folder}/thumb_{file_name}"
+
+            client = self._get_client()
+            bucket_name = settings.MINIO_BUCKET_NAME
+
+            if client:
+                client.put_object(
+                    bucket_name=bucket_name,
+                    object_name=thumb_object_name,
+                    data=io.BytesIO(thumb_bytes),
+                    length=len(thumb_bytes),
+                    content_type="image/jpeg",
+                )
+                logger.info(f"[BACKGROUND JOB] Đã tạo và lưu ảnh thumbnail thành công: {thumb_object_name}")
+                return f"{settings.MINIO_PUBLIC_URL.rstrip('/')}/{bucket_name}/{thumb_object_name}"
+        except Exception as e:
+            logger.error(f"[BACKGROUND JOB] Lỗi khi tạo thumbnail cho {original_object_name}: {e}", exc_info=True)
+        return None
+
+    async def upload_file(
+        self,
+        file: UploadFile,
+        folder: str = "recipes",
+        background_tasks: Optional[BackgroundTasks] = None
+    ) -> str:
+        """Upload file gốc lên MinIO và kích hoạt Background Task tạo thumbnail."""
         content, ext = await self.validate_file(file)
         unique_filename = f"{folder}/{uuid.uuid4()}.{ext}"
 
@@ -125,7 +165,6 @@ class MinIOStorageService:
 
         if client:
             try:
-                # Đảm bảo bucket sẵn sàng trước khi upload
                 self._ensure_bucket()
 
                 client.put_object(
@@ -135,11 +174,19 @@ class MinIOStorageService:
                     length=len(content),
                     content_type=file.content_type,
                 )
+
+                # Kích hoạt Background Job Resize Ảnh nếu truyền background_tasks
+                if background_tasks:
+                    background_tasks.add_task(
+                        self.process_and_upload_thumbnail,
+                        content=content,
+                        original_object_name=unique_filename
+                    )
+
                 return f"{base_url}/{bucket_name}/{unique_filename}"
             except Exception as e:
                 logger.error(f"Failed to upload to MinIO: {e}", exc_info=True)
 
-        # Fallback / Development URL khi không kết nối được MinIO
         return f"{base_url}/{bucket_name}/{unique_filename}"
 
     async def delete_file(self, file_url: str) -> None:
@@ -153,12 +200,10 @@ class MinIOStorageService:
             parsed_url = urlparse(file_url)
             path_parts = parsed_url.path.lstrip("/").split("/")
 
-            # Kiểm tra xem URL có chứa tên bucket hay không
             if len(path_parts) > 1 and path_parts[0] == bucket_name:
                 object_name = "/".join(path_parts[1:])
                 client.remove_object(bucket_name, object_name)
             else:
-                # Nếu URL không chứa bucket name dạng path
                 prefix = f"{settings.MINIO_PUBLIC_URL.rstrip('/')}/{bucket_name}/"
                 if file_url.startswith(prefix):
                     object_name = file_url[len(prefix) :]
