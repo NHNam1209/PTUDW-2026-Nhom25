@@ -39,23 +39,24 @@ router = APIRouter(prefix="/categories", tags=["Categories"])
 )
 async def get_categories(db: AsyncSession = Depends(get_db)):
     stmt = (
-        select(Category)
+        select(
+            Category,
+            func.count(
+                func.nullif(
+                    (Recipe.status == RecipeStatus.Published.value) & (Recipe.is_deleted == False), 
+                    False
+                )
+            ).label("recipe_count")
+        )
+        .outerjoin(Recipe, Category.id == Recipe.category_id)
         .where(Category.is_deleted == False)
+        .group_by(Category.id)
         .order_by(Category.order_index.asc(), Category.name.asc())
     )
     result = await db.execute(stmt)
-    categories = result.scalars().all()
-
+    
     dtos = []
-    for cat in categories:
-        count_stmt = select(func.count()).where(
-            Recipe.category_id == cat.id,
-            Recipe.status == RecipeStatus.Published.value,
-            Recipe.is_deleted == False,
-        )
-        count_res = await db.execute(count_stmt)
-        count = count_res.scalar_one()
-
+    for cat, count in result.all():
         dtos.append(
             CategoryDto(
                 id=cat.id,
@@ -258,6 +259,7 @@ async def update_category(
                 detail="Tên danh mục đã tồn tại.",
             )
         cat.name = req.name
+        cat.slug = await get_unique_slug(db, Category, req.name, current_id=cat.id)
 
     if req.description is not None:
         cat.description = req.description
