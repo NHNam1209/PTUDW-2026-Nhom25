@@ -1,6 +1,8 @@
 import io
 import logging
 import uuid
+import boto3
+from botocore.client import Config
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 
@@ -168,6 +170,30 @@ class MinIOStorageService:
             logger.warning(
                 f"Error deleting object from MinIO ({file_url}): {e}"
             )
+class StorageService:
+    def __init__(self):
+        # Khởi tạo S3 client kết nối tới MinIO
+        self.s3_client = boto3.client(
+            's3',
+            endpoint_url=f"http://{settings.MINIO_ENDPOINT}",
+            aws_access_key_id=settings.MINIO_ACCESS_KEY,
+            aws_secret_access_key=settings.MINIO_SECRET_KEY,
+            config=Config(signature_version='s3v4'),
+            region_name='us-east-1'
+        )
+        self.bucket = settings.MINIO_BUCKET_NAME
 
+    async def upload_file(self, file_data: bytes, file_name: str, content_type: str) -> str:
+        # Upload file lên S3 Bucket
+        self.s3_client.put_object(
+            Bucket=self.bucket,
+            Key=file_name,
+            Body=file_data,
+            ContentType=content_type
+        )
+        # Trả về đường dẫn truy cập file
+        return f"http://{settings.MINIO_ENDPOINT}/{self.bucket}/{file_name}"
+
+storage_service = StorageService()
 
 storage_service = MinIOStorageService()
