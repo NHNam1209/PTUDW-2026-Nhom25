@@ -2,6 +2,8 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from app.jobs.sitemap_job import generate_sitemap_xml
 from app.core.config import settings
 from app.core.database import async_engine, Base
 from app.core.middleware import correlation_id_middleware, register_exception_handlers
@@ -74,3 +76,15 @@ async def root():
         "docs": "/docs",
         "health": "/health",
     }
+
+scheduler = AsyncIOScheduler()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+# Lập lịch chạy tạo sitemap mỗi 24 tiếng
+    scheduler.add_job(generate_sitemap_xml, 'interval', hours=24)
+    scheduler.start()
+    yield
+    scheduler.shutdown()
+
+app = FastAPI(lifespan=lifespan)
