@@ -9,12 +9,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Flame,
+  Image as ImageIcon,
   Info,
   ListOrdered,
   Save,
   Send,
 } from 'lucide-react';
 import { api } from '../api/client';
+import { ImageUploader } from '../components/editor/ImageUploader';
 import { IngredientEditor } from '../components/editor/IngredientEditor';
 import { StepEditor } from '../components/editor/StepEditor';
 import {
@@ -32,7 +34,12 @@ import {
   validateNutrition,
   validateSteps,
 } from '../utils/recipeForm';
-import { syncIngredients, syncSteps } from '../utils/recipeApi';
+import {
+  setPrimaryImage,
+  syncIngredients,
+  syncSteps,
+  uploadQueuedImages,
+} from '../utils/recipeApi';
 import '../styles/editor.css';
 
 const WIZARD_STEPS = [
@@ -40,6 +47,7 @@ const WIZARD_STEPS = [
   { key: 'nutrition', label: 'Dinh dưỡng', icon: Flame },
   { key: 'ingredients', label: 'Nguyên liệu', icon: Carrot },
   { key: 'steps', label: 'Các bước', icon: ListOrdered },
+  { key: 'images', label: 'Hình ảnh', icon: ImageIcon },
 ];
 
 export const RecipeEditorPage = () => {
@@ -54,10 +62,13 @@ export const RecipeEditorPage = () => {
   const [originalIngredients, setOriginalIngredients] = useState([]);
   const [originalSteps, setOriginalSteps] = useState([]);
   const [recipeMeta, setRecipeMeta] = useState(null);
+  const [imageState, setImageState] = useState({ uploaded: [], pending: [], coverKey: null });
+  const [pendingProgress, setPendingProgress] = useState({});
 
   const [stepIndex, setStepIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingPhase, setSavingPhase] = useState('');
   const [error, setError] = useState(null);
   const [touched, setTouched] = useState(false);
 
@@ -85,6 +96,15 @@ export const RecipeEditorPage = () => {
           setOriginalIngredients(loadedIngredients);
           setSteps(loadedSteps);
           setOriginalSteps(loadedSteps);
+
+          const loadedImages = recipe.images || [];
+          const primaryImage = loadedImages.find((image) => image.isPrimary);
+          setImageState({
+            uploaded: loadedImages,
+            pending: [],
+            coverKey: primaryImage?.id || loadedImages[0]?.id || null,
+          });
+
           setRecipeMeta({
             status: recipe.status,
             slug: recipe.slug,
@@ -126,6 +146,7 @@ export const RecipeEditorPage = () => {
     Object.keys(nutritionErrors).length === 0,
     ingredientError === null,
     stepError === null,
+    imageState.uploaded.length + imageState.pending.length > 0,
   ];
 
   const handleFieldChange = (event) => {
@@ -196,6 +217,12 @@ export const RecipeEditorPage = () => {
     }
 
     setSaving(true);
+    setSavingPhase('Đang lưu thông tin...');
+    setPendingProgress({});
+
+    const progressHandler = (uid, percent) => {
+      setPendingProgress((prev) => ({ ...prev, [uid]: percent }));
+    };
 
     try {
       const payload = buildRecipePayload(form);
@@ -207,7 +234,21 @@ export const RecipeEditorPage = () => {
         });
         await syncIngredients(id, originalIngredients, ingredients);
         await syncSteps(id, originalSteps, steps);
+
+        if (imageState.coverKey && !String(imageState.coverKey).startsWith('pending:')) {
+          const coverImage = imageState.uploaded.find((image) => image.id === imageState.coverKey);
+          if (coverImage && !coverImage.isPrimary) {
+            await setPrimaryImage(id, coverImage.id);
+          }
+        }
+
+        if (imageState.pending.length > 0) {
+          setSavingPhase('Đang tải ảnh lên...');
+          await uploadQueuedImages(id, imageState.pending, imageState.coverKey, progressHandler);
+        }
+
         if (publishAfterSave) {
+          setSavingPhase('Đang xuất bản công thức...');
           await api.patch(`/recipes/${id}/publish`);
         }
       } else {
@@ -227,7 +268,13 @@ export const RecipeEditorPage = () => {
           })),
         });
 
+        if (imageState.pending.length > 0) {
+          setSavingPhase('Đang tải ảnh lên...');
+          await uploadQueuedImages(created.id, imageState.pending, imageState.coverKey, progressHandler);
+        }
+
         if (publishAfterSave) {
+          setSavingPhase('Đang xuất bản công thức...');
           await api.patch(`/recipes/${created.id}/publish`);
         }
       }
@@ -235,8 +282,10 @@ export const RecipeEditorPage = () => {
       navigate('/dashboard/recipes');
     } catch (err) {
       setError(err.message || 'Không thể lưu công thức.');
+      setSavingPhase('');
     } finally {
       setSaving(false);
+      setPendingProgress({});
     }
   };
 
@@ -298,6 +347,22 @@ export const RecipeEditorPage = () => {
         <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <AlertCircle size={18} />
           <span>{error}</span>
+        </div>
+      )}
+
+      {saving && savingPhase && (
+        <div
+          className="alert"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            backgroundColor: 'var(--primary-light)',
+            border: '1px solid #fed7aa',
+            color: '#9a3412',
+          }}
+        >
+          <span>{savingPhase}</span>
         </div>
       )}
 
@@ -502,6 +567,15 @@ export const RecipeEditorPage = () => {
             steps={steps}
             onChange={setSteps}
             error={touched ? stepError : null}
+          />
+        )}
+
+        {currentStep.key === 'images' && (
+          <ImageUploader
+            recipeId={isEditing ? id : null}
+            value={imageState}
+            onChange={setImageState}
+            pendingProgress={pendingProgress}
           />
         )}
 

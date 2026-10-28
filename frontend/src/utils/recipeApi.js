@@ -19,6 +19,33 @@ const stepsOrderChanged = (originalSteps, currentSteps) => {
   return false;
 };
 
+export const uploadQueuedImages = async (recipeId, pendingImages, coverKey, onProgress) => {
+  const uploaded = [];
+
+  for (let index = 0; index < pendingImages.length; index += 1) {
+    const item = pendingImages[index];
+    const formData = new FormData();
+    formData.append('file', item.file);
+
+    if (item.altText) {
+      formData.append('altText', item.altText);
+    }
+
+    const isCover = coverKey === `pending:${item.uid}` || (!coverKey && index === 0);
+    formData.append('isPrimary', String(isCover));
+
+    const image = await api.upload(`/recipes/${recipeId}/images`, formData, (percent) => {
+      if (onProgress) onProgress(item.uid, percent);
+    });
+
+    uploaded.push(image);
+  }
+
+  return uploaded;
+};
+
+export const setPrimaryImage = (recipeId, imageId) => api.patch(`/recipes/${recipeId}/images/${imageId}/primary`);
+
 export const syncIngredients = async (recipeId, originalIngredients, currentIngredients) => {
   const currentIds = new Set(currentIngredients.filter((item) => item.id).map((item) => item.id));
 
