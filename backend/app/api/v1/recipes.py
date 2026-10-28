@@ -93,11 +93,18 @@ def _to_detail_dto(recipe: Recipe) -> RecipeDetailDto:
         sodium=recipe.nutrition_sodium,
     )
 
-    steps_dto = [RecipeStepDto.model_validate(s) for s in recipe.steps]
-    ingredients_dto = [
-        RecipeIngredientDto.model_validate(i) for i in recipe.ingredients
+    steps_dto = [
+        RecipeStepDto.model_validate(s)
+        for s in sorted(recipe.steps, key=lambda step: step.step_number)
     ]
-    images_dto = [RecipeImageDto.model_validate(img) for img in recipe.images]
+    ingredients_dto = [
+        RecipeIngredientDto.model_validate(i)
+        for i in sorted(recipe.ingredients, key=lambda ing: ing.order_index)
+    ]
+    images_dto = [
+        RecipeImageDto.model_validate(img)
+        for img in sorted(recipe.images, key=lambda image: image.order_index)
+    ]
 
     return RecipeDetailDto(
         id=recipe.id,
