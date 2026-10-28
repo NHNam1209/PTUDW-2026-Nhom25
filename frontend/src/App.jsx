@@ -35,6 +35,29 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Admin-only Route Wrapper
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', color: 'var(--text-muted)' }}>
+        Đang tải trạng thái xác thực...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   return (
     <BrowserRouter>
@@ -95,9 +118,9 @@ function App() {
               <Route
                 path="/dashboard/categories"
                 element={
-                  <ProtectedRoute>
+                  <AdminRoute>
                     <CategoryManagePage />
-                  </ProtectedRoute>
+                  </AdminRoute>
                 }
               />
 
