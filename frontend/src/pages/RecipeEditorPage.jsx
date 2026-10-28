@@ -1,687 +1,716 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { api } from '../api/client';
-import { useAuth } from '../context/AuthContext';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  Save,
+  AlertCircle,
   ArrowLeft,
-  Plus,
-  Trash2,
-  Upload,
-  Image as ImageIcon,
+  Carrot,
+  Check,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Flame,
-  AlertCircle,
-  CheckCircle,
+  Info,
+  ListOrdered,
+  Plus,
+  Save,
+  Send,
+  Trash2,
 } from 'lucide-react';
+import { api } from '../api/client';
+import {
+  DIFFICULTY_OPTIONS,
+  STATUS_LABELS,
+  buildRecipePayload,
+  createEmptyForm,
+  createEmptyIngredient,
+  createEmptyStep,
+  formFromRecipe,
+  ingredientsFromRecipe,
+  stepsFromRecipe,
+  validateInfoStep,
+  validateIngredients,
+  validateNutrition,
+  validateSteps,
+} from '../utils/recipeForm';
+import { syncIngredients, syncSteps } from '../utils/recipeApi';
+import '../styles/editor.css';
+
+const WIZARD_STEPS = [
+  { key: 'info', label: 'Thông tin', icon: Info },
+  { key: 'nutrition', label: 'Dinh dưỡng', icon: Flame },
+  { key: 'ingredients', label: 'Nguyên liệu', icon: Carrot },
+  { key: 'steps', label: 'Các bước', icon: ListOrdered },
+];
 
 export const RecipeEditorPage = () => {
   const { id } = useParams();
   const isEditing = Boolean(id);
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(isEditing);
-  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState(createEmptyForm);
+  const [ingredients, setIngredients] = useState([]);
+  const [steps, setSteps] = useState([]);
+  const [originalIngredients, setOriginalIngredients] = useState([]);
+  const [originalSteps, setOriginalSteps] = useState([]);
+  const [recipeMeta, setRecipeMeta] = useState(null);
+
+  const [stepIndex, setStepIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [successMsg, setSuccessMsg] = useState(null);
+  const [touched, setTouched] = useState(false);
 
-  // Form State
-  const [formData, setFormData] = useState({
-    title: '',
-    categoryId: '',
-    difficulty: 'Easy',
-    prepTime: 15,
-    cookTime: 30,
-    servings: 4,
-    description: '',
-    instructions: '',
-    calories: 350,
-    protein: 20,
-    carbohydrates: 30,
-    fat: 10,
-    rowVersion: 1,
-    status: 0,
-  });
-
-  const [ingredients, setIngredients] = useState([
-    { name: '', quantity: 1, unit: 'g', notes: '' },
-  ]);
-
-  const [steps, setSteps] = useState([
-    { stepNumber: 1, title: 'Chuẩn bị nguyên liệu', description: '', timerMinutes: 0 },
-  ]);
-
-  const [images, setImages] = useState([]);
-  const [uploadingImage, setUploadingImage] = useState(false);
-
-  // Fetch categories & recipe data if editing
   useEffect(() => {
-    const fetchCategories = async () => {
+    let active = true;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        const catRes = await api.get('/categories');
-        setCategories(catRes || []);
-        if (!isEditing && catRes?.length > 0) {
-          setFormData((prev) => ({ ...prev, categoryId: catRes[0].id }));
+        const categoryList = await api.get('/categories');
+        if (!active) return;
+        setCategories(categoryList || []);
+
+        if (isEditing) {
+          const recipe = await api.get(`/recipes/${id}`);
+          if (!active) return;
+
+          setForm(formFromRecipe(recipe));
+
+          const loadedIngredients = ingredientsFromRecipe(recipe);
+          const loadedSteps = stepsFromRecipe(recipe);
+          setIngredients(loadedIngredients);
+          setOriginalIngredients(loadedIngredients);
+          setSteps(loadedSteps);
+          setOriginalSteps(loadedSteps);
+          setRecipeMeta({
+            status: recipe.status,
+            slug: recipe.slug,
+            rowVersion: recipe.rowVersion ?? 1,
+          });
+        } else {
+          const defaultIngredient = createEmptyIngredient();
+          const defaultStep = createEmptyStep(0);
+          setIngredients([defaultIngredient]);
+          setSteps([defaultStep]);
+          setForm((prev) => ({
+            ...prev,
+            categoryId: categoryList?.[0]?.id || '',
+          }));
         }
       } catch (err) {
-        console.error('Failed to fetch categories:', err);
+        if (active) {
+          setError(err.message || 'Không thể tải dữ liệu công thức.');
+        }
+      } finally {
+        if (active) setLoading(false);
       }
     };
 
-    fetchCategories();
+    load();
 
-    if (isEditing) {
-      const fetchRecipe = async () => {
-        try {
-          const res = await api.get(`/recipes/${id}`);
-          setFormData({
-            title: res.title || '',
-            categoryId: res.categoryId || '',
-            difficulty: res.difficulty || 'Easy',
-            prepTime: res.prepTime || 0,
-            cookTime: res.cookTime || 0,
-            servings: res.servings || 1,
-            description: res.description || '',
-            instructions: res.instructions || '',
-            calories: res.nutrition?.calories || 0,
-            protein: res.nutrition?.protein || 0,
-            carbohydrates: res.nutrition?.carbohydrates || 0,
-            fat: res.nutrition?.fat || 0,
-            rowVersion: res.rowVersion || 1,
-            status: res.status || 0,
-          });
-
-          if (res.ingredients && res.ingredients.length > 0) {
-            setIngredients(res.ingredients);
-          }
-          if (res.steps && res.steps.length > 0) {
-            setSteps(res.steps);
-          }
-          if (res.images && res.images.length > 0) {
-            setImages(res.images);
-          }
-        } catch (err) {
-          setError(err.message || 'Không thể tải công thức');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchRecipe();
-    }
+    return () => {
+      active = false;
+    };
   }, [id, isEditing]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: ['prepTime', 'cookTime', 'servings', 'calories', 'protein', 'carbohydrates', 'fat'].includes(name)
-        ? Number(value)
-        : value,
-    }));
-  };
+  const infoErrors = useMemo(() => validateInfoStep(form), [form]);
+  const nutritionErrors = useMemo(() => validateNutrition(form), [form]);
+  const ingredientError = useMemo(() => validateIngredients(ingredients), [ingredients]);
+  const stepError = useMemo(() => validateSteps(steps), [steps]);
 
-  // Ingredient helpers
-  const handleAddIngredient = () => {
-    setIngredients((prev) => [...prev, { name: '', quantity: 1, unit: 'g', notes: '' }]);
-  };
+  const stepCompletion = [
+    Object.keys(infoErrors).length === 0,
+    Object.keys(nutritionErrors).length === 0,
+    ingredientError === null,
+    stepError === null,
+  ];
 
-  const handleRemoveIngredient = (index) => {
-    setIngredients((prev) => prev.filter((_, idx) => idx !== index));
+  const handleFieldChange = (event) => {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleIngredientChange = (index, field, value) => {
     setIngredients((prev) => {
-      const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        [field]: field === 'quantity' ? Number(value) : value,
-      };
-      return updated;
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
     });
   };
 
-  // Step helpers
-  const handleAddStep = () => {
-    setSteps((prev) => [
-      ...prev,
-      { stepNumber: prev.length + 1, title: `Bước ${prev.length + 1}`, description: '', timerMinutes: 0 },
-    ]);
+  const handleAddIngredient = () => {
+    setIngredients((prev) => [...prev, createEmptyIngredient()]);
   };
 
-  const handleRemoveStep = (index) => {
-    setSteps((prev) => {
-      const updated = prev.filter((_, idx) => idx !== index);
-      return updated.map((step, idx) => ({ ...step, stepNumber: idx + 1 }));
-    });
+  const handleRemoveIngredient = (index) => {
+    setIngredients((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
   };
 
   const handleStepChange = (index, field, value) => {
     setSteps((prev) => {
-      const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        [field]: field === 'timerMinutes' ? Number(value) : value,
-      };
-      return updated;
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
     });
   };
 
-  // Upload image
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !isEditing) return;
-
-    setUploadingImage(true);
-    setError(null);
-    try {
-      const formPayload = new FormData();
-      formPayload.append('file', file);
-      formPayload.append('isPrimary', images.length === 0 ? 'true' : 'false');
-
-      const newImg = await api.post(`/recipes/${id}/images`, formPayload);
-      setImages((prev) => [...prev, newImg]);
-      setSuccessMsg('Đã tải ảnh lên thành công!');
-    } catch (err) {
-      setError(err.message || 'Lỗi khi tải ảnh lên');
-    } finally {
-      setUploadingImage(false);
-    }
+  const handleAddStep = () => {
+    setSteps((prev) => [...prev, createEmptyStep(prev.length)]);
   };
 
-  const handleSubmit = async (targetStatus = 0) => {
+  const handleRemoveStep = (index) => {
+    setSteps((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+  };
+
+  const currentStep = WIZARD_STEPS[stepIndex];
+
+  const goToStep = (index) => {
+    setTouched(false);
+    setStepIndex(index);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const validateCurrentStep = () => {
+    if (currentStep.key === 'info' && Object.keys(infoErrors).length > 0) {
+      setTouched(true);
+      return false;
+    }
+    if (currentStep.key === 'nutrition' && Object.keys(nutritionErrors).length > 0) {
+      setTouched(true);
+      return false;
+    }
+    if (currentStep.key === 'ingredients' && ingredientError) {
+      setTouched(true);
+      return false;
+    }
+    if (currentStep.key === 'steps' && stepError) {
+      setTouched(true);
+      return false;
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!validateCurrentStep()) return;
+    goToStep(Math.min(stepIndex + 1, WIZARD_STEPS.length - 1));
+  };
+
+  const handleBack = () => {
+    goToStep(Math.max(stepIndex - 1, 0));
+  };
+
+  const handleSave = async (publishAfterSave) => {
+    setTouched(true);
     setError(null);
-    setSuccessMsg(null);
-    setSubmitting(true);
 
-    if (!formData.title.trim()) {
-      setError('Vui lòng nhập tên công thức món ăn.');
-      setSubmitting(false);
+    if (Object.keys(infoErrors).length > 0) {
+      setStepIndex(0);
+      setError('Vui lòng hoàn thiện thông tin chung trước khi lưu.');
+      return;
+    }
+    if (Object.keys(nutritionErrors).length > 0) {
+      setStepIndex(1);
+      setError('Giá trị dinh dưỡng chưa hợp lệ.');
+      return;
+    }
+    if (ingredientError) {
+      setStepIndex(2);
+      setError(ingredientError);
+      return;
+    }
+    if (stepError) {
+      setStepIndex(3);
+      setError(stepError);
       return;
     }
 
-    if (!formData.categoryId) {
-      setError('Vui lòng chọn danh mục cho công thức.');
-      setSubmitting(false);
-      return;
-    }
-
-    const payload = {
-      title: formData.title,
-      categoryId: formData.categoryId,
-      difficulty: formData.difficulty,
-      prepTime: formData.prepTime,
-      cookTime: formData.cookTime,
-      servings: formData.servings,
-      description: formData.description,
-      instructions: formData.instructions,
-      nutrition: {
-        calories: formData.calories,
-        protein: formData.protein,
-        carbohydrates: formData.carbohydrates,
-        fat: formData.fat,
-      },
-      ingredients: ingredients
-        .filter((i) => i.name.trim() !== '')
-        .map((i, idx) => ({
-          name: i.name,
-          quantity: i.quantity,
-          unit: i.unit,
-          notes: i.notes,
-          orderIndex: idx + 1,
-        })),
-      steps: steps
-        .filter((s) => s.description.trim() !== '' || s.title.trim() !== '')
-        .map((s, idx) => ({
-          stepNumber: idx + 1,
-          title: s.title || `Bước ${idx + 1}`,
-          description: s.description,
-          timerMinutes: s.timerMinutes || 0,
-        })),
-    };
+    setSaving(true);
 
     try {
+      const payload = buildRecipePayload(form);
+
       if (isEditing) {
         await api.put(`/recipes/${id}`, {
           ...payload,
-          rowVersion: formData.rowVersion,
+          rowVersion: recipeMeta?.rowVersion,
         });
-
-        if (targetStatus === 1 && formData.status === 0) {
+        await syncIngredients(id, originalIngredients, ingredients);
+        await syncSteps(id, originalSteps, steps);
+        if (publishAfterSave) {
           await api.patch(`/recipes/${id}/publish`);
         }
-
-        setSuccessMsg('Cập nhật công thức thành công!');
-        setTimeout(() => navigate('/dashboard'), 1000);
       } else {
-        const created = await api.post('/recipes', payload);
-        if (targetStatus === 1 && created?.id) {
+        const created = await api.post('/recipes', {
+          ...payload,
+          ingredients: ingredients.map((ingredient, index) => ({
+            name: ingredient.name.trim(),
+            quantity: ingredient.quantity === '' ? null : Number(ingredient.quantity),
+            unit: ingredient.unit.trim() || null,
+            notes: ingredient.notes.trim() || null,
+            orderIndex: index,
+          })),
+          steps: steps.map((step) => ({
+            title: step.title.trim(),
+            description: step.description.trim(),
+            timerMinutes: step.timerMinutes === '' ? 0 : Number(step.timerMinutes),
+          })),
+        });
+
+        if (publishAfterSave) {
           await api.patch(`/recipes/${created.id}/publish`);
         }
-        setSuccessMsg('Tạo công thức mới thành công!');
-        setTimeout(() => navigate('/dashboard'), 1000);
       }
+
+      navigate('/dashboard/recipes');
     } catch (err) {
-      setError(err.message || 'Không thể lưu công thức');
+      setError(err.message || 'Không thể lưu công thức.');
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="container" style={{ padding: '5rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        Đang tải thông tin công thức...
+      <div className="editor-shell" style={{ textAlign: 'center', color: 'var(--text-muted)', paddingTop: '6rem' }}>
+        Đang tải dữ liệu công thức...
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ padding: '3rem 1.25rem 6rem', maxWidth: '960px' }}>
-      
-      {/* Header bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+    <div className="editor-shell">
+      <div className="editor-header">
         <div>
-          <Link to="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-            <ArrowLeft size={16} /> Quay lại Dashboard
+          <Link
+            to="/dashboard/recipes"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              fontSize: '0.8125rem',
+              color: 'var(--text-muted)',
+              marginBottom: '0.5rem',
+            }}
+          >
+            <ArrowLeft size={14} />
+            <span>Quay lại danh sách công thức</span>
           </Link>
-          <h1 style={{ fontSize: '1.875rem' }}>
-            {isEditing ? 'Chỉnh Sửa Công Thức' : 'Tạo Mới Công Thức Ẩm Thực'}
+          <h1 style={{ fontSize: '1.875rem', marginBottom: '0.25rem' }}>
+            {isEditing ? 'Chỉnh Sửa Công Thức' : 'Tạo Công Thức Mới'}
           </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9375rem' }}>
+            Hoàn thành {WIZARD_STEPS.length} bước để có một công thức hoàn chỉnh.
+          </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button
-            type="button"
-            className="btn btn-outline"
-            disabled={submitting}
-            onClick={() => handleSubmit(0)}
-          >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          {isEditing && recipeMeta && (
+            <span
+              className={`badge ${recipeMeta.status === 1 ? 'badge-published' : recipeMeta.status === 2 ? 'badge-archived' : 'badge-draft'}`}
+              style={{ alignSelf: 'center' }}
+            >
+              {STATUS_LABELS[recipeMeta.status] || 'Bản nháp'}
+            </span>
+          )}
+          <button type="button" className="btn btn-outline" onClick={() => handleSave(false)} disabled={saving}>
             <Save size={16} />
-            <span>Lưu Nháp</span>
+            <span>{saving ? 'Đang lưu...' : 'Lưu nháp'}</span>
           </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={submitting}
-            onClick={() => handleSubmit(1)}
-          >
-            <CheckCircle size={16} />
-            <span>Xuất Bản Ngay</span>
+          <button type="button" className="btn btn-primary" onClick={() => handleSave(true)} disabled={saving}>
+            <Send size={16} />
+            <span>Xuất bản</span>
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
 
-      {successMsg && (
-        <div className="alert alert-success" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-          <CheckCircle size={18} />
-          <span>{successMsg}</span>
-        </div>
-      )}
+      <nav className="editor-rail" aria-label="Các bước tạo công thức">
+        {WIZARD_STEPS.map((wizardStep, index) => {
+          const Icon = wizardStep.icon;
+          const isActive = index === stepIndex;
+          const isDone = stepCompletion[index] && index !== stepIndex;
 
-      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(0); }} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        
-        {/* Section 1: Thông tin cơ bản */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
-            1. Thông Tin Chung
-          </h2>
-
-          <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-            <label className="form-label" style={{ fontWeight: 600 }}>Tên món ăn / Tiêu đề công thức *</label>
-            <input
-              type="text"
-              name="title"
-              className="form-control"
-              placeholder="VD: Phở Bò Tái Lăn Hà Nội Chuẩn Vị"
-              value={formData.title}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 600 }}>Danh mục ẩm thực *</label>
-              <select
-                name="categoryId"
-                className="form-control"
-                value={formData.categoryId}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">-- Chọn danh mục --</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 600 }}>Độ khó</label>
-              <select
-                name="difficulty"
-                className="form-control"
-                value={formData.difficulty}
-                onChange={handleInputChange}
-              >
-                <option value="Easy">Dễ (Easy)</option>
-                <option value="Medium">Trung bình (Medium)</option>
-                <option value="Hard">Khó (Hard)</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 600 }}>Khẩu phần (Người)</label>
-              <input
-                type="number"
-                name="servings"
-                min="1"
-                className="form-control"
-                value={formData.servings}
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 600 }}>Thời gian chuẩn bị (Phút)</label>
-              <input
-                type="number"
-                name="prepTime"
-                min="0"
-                className="form-control"
-                value={formData.prepTime}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 600 }}>Thời gian nấu (Phút)</label>
-              <input
-                type="number"
-                name="cookTime"
-                min="0"
-                className="form-control"
-                value={formData.cookTime}
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" style={{ fontWeight: 600 }}>Mô tả ngắn gọn về món ăn</label>
-            <textarea
-              name="description"
-              rows={3}
-              className="form-control"
-              placeholder="Chia sẻ đôi nét về nguồn gốc, hương vị hoặc kỷ niệm gắn liền với món ăn này..."
-              value={formData.description}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
-
-        {/* Section 2: Dinh dưỡng */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Flame size={18} color="var(--primary)" /> 2. Giá Trị Dinh Dưỡng (Mỗi Khẩu Phần)
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label">Calories (kcal)</label>
-              <input
-                type="number"
-                name="calories"
-                className="form-control"
-                value={formData.calories}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Protein (g)</label>
-              <input
-                type="number"
-                name="protein"
-                className="form-control"
-                value={formData.protein}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Carbs (g)</label>
-              <input
-                type="number"
-                name="carbohydrates"
-                className="form-control"
-                value={formData.carbohydrates}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Chất béo / Fat (g)</label>
-              <input
-                type="number"
-                name="fat"
-                className="form-control"
-                value={formData.fat}
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: Nguyên liệu */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
-            <h2 style={{ fontSize: '1.25rem' }}>3. Danh Sách Nguyên Liệu</h2>
+          return (
             <button
+              key={wizardStep.key}
               type="button"
-              onClick={handleAddIngredient}
-              className="btn btn-outline btn-sm"
+              className={`editor-rail-item${isActive ? ' active' : ''}${isDone ? ' done' : ''}`}
+              onClick={() => goToStep(index)}
+              aria-current={isActive ? 'step' : undefined}
             >
-              <Plus size={14} /> Thêm nguyên liệu
+              <span className="editor-rail-index">
+                {isDone ? <Check size={13} /> : <Icon size={13} />}
+              </span>
+              <span>{wizardStep.label}</span>
             </button>
-          </div>
+          );
+        })}
+      </nav>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {ingredients.map((ing, idx) => (
-              <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr auto', gap: '0.75rem', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  placeholder="Tên nguyên liệu (VD: Thịt thăn bò)"
-                  className="form-control"
-                  value={ing.name}
-                  onChange={(e) => handleIngredientChange(idx, 'name', e.target.value)}
-                />
-                <input
-                  type="number"
-                  step="0.1"
-                  placeholder="Số lượng"
-                  className="form-control"
-                  value={ing.quantity}
-                  onChange={(e) => handleIngredientChange(idx, 'quantity', e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Đơn vị (g, muỗng...)"
-                  className="form-control"
-                  value={ing.unit}
-                  onChange={(e) => handleIngredientChange(idx, 'unit', e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Ghi chú (tùy chọn)"
-                  className="form-control"
-                  value={ing.notes || ''}
-                  onChange={(e) => handleIngredientChange(idx, 'notes', e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveIngredient(idx)}
-                  className="btn btn-sm"
-                  style={{ backgroundColor: '#fef2f2', color: '#dc2626', padding: '0.5rem' }}
-                  title="Xóa dòng"
+      <section className="editor-card">
+        {currentStep.key === 'info' && (
+          <>
+            <h2 className="editor-section-title">1. Thông Tin Chung</h2>
+
+            <div className="field">
+              <label className="field-label" htmlFor="title">
+                Tên món ăn / Tiêu đề công thức *
+              </label>
+              <input
+                id="title"
+                name="title"
+                type="text"
+                className={`input${touched && infoErrors.title ? ' input-error' : ''}`}
+                placeholder="VD: Phở Bò Tái Lăn Hà Nội Chuẩn Vị"
+                value={form.title}
+                onChange={handleFieldChange}
+              />
+              {touched && infoErrors.title && <span className="field-error">{infoErrors.title}</span>}
+              <span className="field-hint">Từ 5 đến 200 ký tự.</span>
+            </div>
+
+            <div className="editor-grid">
+              <div className="field">
+                <label className="field-label" htmlFor="categoryId">Danh mục ẩm thực *</label>
+                <select
+                  id="categoryId"
+                  name="categoryId"
+                  className={`select${touched && infoErrors.categoryId ? ' input-error' : ''}`}
+                  value={form.categoryId}
+                  onChange={handleFieldChange}
                 >
-                  <Trash2 size={16} />
-                </button>
+                  <option value="">-- Chọn danh mục --</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
+                {touched && infoErrors.categoryId && <span className="field-error">{infoErrors.categoryId}</span>}
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Section 4: Các bước thực hiện */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
-            <h2 style={{ fontSize: '1.25rem' }}>4. Các Bước Nấu Ăn (Có Hẹn Giờ Timer)</h2>
-            <button
-              type="button"
-              onClick={handleAddStep}
-              className="btn btn-outline btn-sm"
-            >
-              <Plus size={14} /> Thêm bước thực hiện
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {steps.map((st, idx) => (
-              <div key={idx} style={{ padding: '1.25rem', border: '1px solid var(--border)', borderRadius: '0.75rem', backgroundColor: '#fcfcfc' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--primary)' }}>
-                    Bước {idx + 1}
-                  </span>
-                  {steps.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveStep(idx)}
-                      className="btn btn-sm"
-                      style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}
-                    >
-                      <Trash2 size={14} /> Xóa bước này
-                    </button>
-                  )}
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                  <div className="form-group">
-                    <label className="form-label">Tiêu đề bước</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="VD: Xào sơ thịt bò với lửa lớn"
-                      value={st.title}
-                      onChange={(e) => handleStepChange(idx, 'title', e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <Clock size={14} /> Hẹn giờ (Phút)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      className="form-control"
-                      placeholder="0 nếu không cần"
-                      value={st.timerMinutes}
-                      onChange={(e) => handleStepChange(idx, 'timerMinutes', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Mô tả chi tiết cách làm</label>
-                  <textarea
-                    rows={3}
-                    className="form-control"
-                    placeholder="Mô tả kỹ thuật nấu, nhiệt độ, dấu hiệu món ăn đạt yêu cầu..."
-                    value={st.description}
-                    onChange={(e) => handleStepChange(idx, 'description', e.target.value)}
-                  />
-                </div>
+              <div className="field">
+                <label className="field-label" htmlFor="difficulty">Độ khó</label>
+                <select
+                  id="difficulty"
+                  name="difficulty"
+                  className="select"
+                  value={form.difficulty}
+                  onChange={handleFieldChange}
+                >
+                  {DIFFICULTY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Section 5: Quản lý hình ảnh (chỉ khi đang edit) */}
-        {isEditing && (
-          <div className="card" style={{ padding: '2rem' }}>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ImageIcon size={18} /> 5. Hình Ảnh Món Ăn
-            </h2>
+              <div className="field">
+                <label className="field-label" htmlFor="servings">Khẩu phần (người) *</label>
+                <input
+                  id="servings"
+                  name="servings"
+                  type="number"
+                  min="1"
+                  className={`input${touched && infoErrors.servings ? ' input-error' : ''}`}
+                  value={form.servings}
+                  onChange={handleFieldChange}
+                />
+                {touched && infoErrors.servings && <span className="field-error">{infoErrors.servings}</span>}
+              </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-              {images.map((img) => (
-                <div key={img.id} style={{ position: 'relative', width: '120px', height: '120px', borderRadius: '0.5rem', overflow: 'hidden', border: img.isPrimary ? '3px solid var(--primary)' : '1px solid var(--border)' }}>
-                  <img
-                    src={img.thumbnailUrl || img.originalUrl}
-                    alt="recipe"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              <div className="field">
+                <label className="field-label" htmlFor="prepTimeMinutes">Chuẩn bị (phút) *</label>
+                <input
+                  id="prepTimeMinutes"
+                  name="prepTimeMinutes"
+                  type="number"
+                  min="1"
+                  className={`input${touched && infoErrors.prepTimeMinutes ? ' input-error' : ''}`}
+                  value={form.prepTimeMinutes}
+                  onChange={handleFieldChange}
+                />
+                {touched && infoErrors.prepTimeMinutes && <span className="field-error">{infoErrors.prepTimeMinutes}</span>}
+              </div>
+
+              <div className="field">
+                <label className="field-label" htmlFor="cookTimeMinutes">Nấu (phút) *</label>
+                <input
+                  id="cookTimeMinutes"
+                  name="cookTimeMinutes"
+                  type="number"
+                  min="0"
+                  className={`input${touched && infoErrors.cookTimeMinutes ? ' input-error' : ''}`}
+                  value={form.cookTimeMinutes}
+                  onChange={handleFieldChange}
+                />
+                {touched && infoErrors.cookTimeMinutes && <span className="field-error">{infoErrors.cookTimeMinutes}</span>}
+              </div>
+            </div>
+
+            <div className="field" style={{ marginTop: '1.25rem' }}>
+              <label className="field-label" htmlFor="description">Mô tả ngắn về món ăn *</label>
+              <textarea
+                id="description"
+                name="description"
+                rows={3}
+                className={`textarea${touched && infoErrors.description ? ' input-error' : ''}`}
+                placeholder="Nguồn gốc, hương vị hoặc câu chuyện gắn liền với món ăn..."
+                value={form.description}
+                onChange={handleFieldChange}
+              />
+              {touched && infoErrors.description && <span className="field-error">{infoErrors.description}</span>}
+              <span className="field-hint">{form.description.trim().length} ký tự (tối thiểu 10).</span>
+            </div>
+
+            <div className="field">
+              <label className="field-label" htmlFor="instructions">Hướng dẫn tổng quan (tùy chọn)</label>
+              <textarea
+                id="instructions"
+                name="instructions"
+                rows={3}
+                className="textarea"
+                placeholder="Ghi chú chung, mẹo nấu ăn hoặc lưu ý trước khi bắt đầu..."
+                value={form.instructions}
+                onChange={handleFieldChange}
+              />
+            </div>
+          </>
+        )}
+
+        {currentStep.key === 'nutrition' && (
+          <>
+            <h2 className="editor-section-title">2. Dinh Dưỡng (mỗi khẩu phần)</h2>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+              Các trường không bắt buộc. Bạn có thể để trống nếu chưa ước tính được.
+            </p>
+
+            <div className="editor-grid">
+              {[
+                { name: 'calories', label: 'Calories (kcal)' },
+                { name: 'protein', label: 'Protein (g)' },
+                { name: 'carbohydrates', label: 'Carbohydrate (g)' },
+                { name: 'fat', label: 'Chất béo (g)' },
+                { name: 'fiber', label: 'Chất xơ (g)' },
+                { name: 'sodium', label: 'Natri (mg)' },
+              ].map((field) => (
+                <div className="field" key={field.name}>
+                  <label className="field-label" htmlFor={field.name}>{field.label}</label>
+                  <input
+                    id={field.name}
+                    name={field.name}
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className={`input${touched && nutritionErrors[field.name] ? ' input-error' : ''}`}
+                    value={form[field.name]}
+                    onChange={handleFieldChange}
                   />
-                  {img.isPrimary && (
-                    <span style={{ position: 'absolute', bottom: 4, left: 4, background: 'var(--primary)', color: '#fff', fontSize: '0.625rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                      Ảnh chính
-                    </span>
+                  {touched && nutritionErrors[field.name] && (
+                    <span className="field-error">{nutritionErrors[field.name]}</span>
                   )}
                 </div>
               ))}
             </div>
-
-            <div style={{ border: '2px dashed var(--border)', borderRadius: '0.75rem', padding: '2rem', textAlign: 'center', backgroundColor: '#fafafa' }}>
-              <Upload size={32} style={{ margin: '0 auto 0.75rem', color: 'var(--text-muted)' }} />
-              <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Tải lên hình ảnh món ăn mới</p>
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                Hỗ trợ định dạng JPG, PNG, WEBP (Tối đa 10MB)
-              </p>
-              <label className="btn btn-outline btn-sm" style={{ cursor: 'pointer' }}>
-                <span>{uploadingImage ? 'Đang tải lên...' : 'Chọn tập tin ảnh'}</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage}
-                />
-              </label>
-            </div>
-          </div>
+          </>
         )}
 
-        {/* Bottom Actions */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', paddingTop: '1rem' }}>
-          <Link to="/dashboard" className="btn btn-outline">
-            Hủy bỏ
-          </Link>
-          <button
-            type="button"
-            className="btn btn-outline"
-            disabled={submitting}
-            onClick={() => handleSubmit(0)}
-          >
-            <Save size={16} />
-            <span>Lưu Bản Nháp</span>
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={submitting}
-            onClick={() => handleSubmit(1)}
-          >
-            <CheckCircle size={16} />
-            <span>{isEditing ? 'Cập Nhật & Xuất Bản' : 'Tạo & Xuất Bản Ngay'}</span>
-          </button>
-        </div>
+        {currentStep.key === 'ingredients' && (
+          <>
+            <div className="editor-list-actions">
+              <h2 className="editor-section-title" style={{ margin: 0, border: 'none', padding: 0 }}>
+                3. Nguyên Liệu ({ingredients.length})
+              </h2>
+              <button type="button" className="btn btn-outline btn-sm" onClick={handleAddIngredient}>
+                <Plus size={14} />
+                <span>Thêm nguyên liệu</span>
+              </button>
+            </div>
 
-      </form>
+            {ingredientError && touched && (
+              <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{ingredientError}</div>
+            )}
+
+            {ingredients.length === 0 ? (
+              <div className="empty-state">Chưa có nguyên liệu nào. Hãy thêm nguyên liệu đầu tiên.</div>
+            ) : (
+              <div className="editor-list">
+                {ingredients.map((ingredient, index) => (
+                  <div className="item-row" key={index}>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Tên nguyên liệu"
+                      value={ingredient.name}
+                      onChange={(event) => handleIngredientChange(index, 'name', event.target.value)}
+                      aria-label={`Tên nguyên liệu ${index + 1}`}
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      className="input"
+                      placeholder="Số lượng"
+                      value={ingredient.quantity}
+                      onChange={(event) => handleIngredientChange(index, 'quantity', event.target.value)}
+                      aria-label={`Số lượng nguyên liệu ${index + 1}`}
+                    />
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Đơn vị"
+                      value={ingredient.unit}
+                      onChange={(event) => handleIngredientChange(index, 'unit', event.target.value)}
+                      aria-label={`Đơn vị nguyên liệu ${index + 1}`}
+                    />
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Ghi chú (tùy chọn)"
+                      value={ingredient.notes}
+                      onChange={(event) => handleIngredientChange(index, 'notes', event.target.value)}
+                      aria-label={`Ghi chú nguyên liệu ${index + 1}`}
+                    />
+                    <button
+                      type="button"
+                      className="icon-btn danger"
+                      onClick={() => handleRemoveIngredient(index)}
+                      title="Xóa nguyên liệu"
+                      aria-label={`Xóa nguyên liệu ${index + 1}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {currentStep.key === 'steps' && (
+          <>
+            <div className="editor-list-actions">
+              <h2 className="editor-section-title" style={{ margin: 0, border: 'none', padding: 0 }}>
+                4. Các Bước Thực Hiện ({steps.length})
+              </h2>
+              <button type="button" className="btn btn-outline btn-sm" onClick={handleAddStep}>
+                <Plus size={14} />
+                <span>Thêm bước</span>
+              </button>
+            </div>
+
+            {stepError && touched && (
+              <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{stepError}</div>
+            )}
+
+            {steps.length === 0 ? (
+              <div className="empty-state">Chưa có bước nào. Hãy thêm bước thực hiện đầu tiên.</div>
+            ) : (
+              <div className="editor-list">
+                {steps.map((step, index) => (
+                  <div className="item-card" key={index}>
+                    <div className="editor-list-actions" style={{ marginBottom: '1rem' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.9375rem' }}>
+                        Bước {index + 1}
+                      </span>
+                      <button
+                        type="button"
+                        className="icon-btn danger"
+                        onClick={() => handleRemoveStep(index)}
+                        title="Xóa bước"
+                        aria-label={`Xóa bước ${index + 1}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    <div className="editor-grid" style={{ marginBottom: '1rem' }}>
+                      <div className="field" style={{ margin: 0 }}>
+                        <label className="field-label" htmlFor={`step-title-${index}`}>Tiêu đề bước *</label>
+                        <input
+                          id={`step-title-${index}`}
+                          type="text"
+                          className="input"
+                          placeholder="VD: Xào sơ thịt bò với lửa lớn"
+                          value={step.title}
+                          onChange={(event) => handleStepChange(index, 'title', event.target.value)}
+                        />
+                      </div>
+
+                      <div className="field" style={{ margin: 0 }}>
+                        <label className="field-label" htmlFor={`step-timer-${index}`}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <Clock size={13} /> Hẹn giờ (phút)
+                          </span>
+                        </label>
+                        <input
+                          id={`step-timer-${index}`}
+                          type="number"
+                          min="0"
+                          className="input"
+                          placeholder="0 = không cần"
+                          value={step.timerMinutes}
+                          onChange={(event) => handleStepChange(index, 'timerMinutes', event.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label className="field-label" htmlFor={`step-description-${index}`}>Mô tả chi tiết *</label>
+                      <textarea
+                        id={`step-description-${index}`}
+                        rows={3}
+                        className="textarea"
+                        placeholder="Mô tả kỹ thuật nấu, nhiệt độ, dấu hiệu món ăn đạt yêu cầu..."
+                        value={step.description}
+                        onChange={(event) => handleStepChange(index, 'description', event.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        <div className="editor-actions">
+          <button type="button" className="btn btn-outline" onClick={handleBack} disabled={stepIndex === 0}>
+            <ChevronLeft size={16} />
+            <span>Trước</span>
+          </button>
+
+          <div className="editor-actions-right">
+            <span style={{ alignSelf: 'center', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+              Bước {stepIndex + 1}/{WIZARD_STEPS.length}
+            </span>
+
+            {stepIndex < WIZARD_STEPS.length - 1 ? (
+              <button type="button" className="btn btn-primary" onClick={handleNext}>
+                <span>Tiếp tục</span>
+                <ChevronRight size={16} />
+              </button>
+            ) : (
+              <>
+                <button type="button" className="btn btn-outline" onClick={() => handleSave(false)} disabled={saving}>
+                  <Save size={16} />
+                  <span>{saving ? 'Đang lưu...' : 'Lưu nháp'}</span>
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => handleSave(true)} disabled={saving}>
+                  <CheckCircle size={16} />
+                  <span>{isEditing ? 'Cập nhật & Xuất bản' : 'Tạo & Xuất bản'}</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
