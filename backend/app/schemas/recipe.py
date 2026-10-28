@@ -28,7 +28,9 @@ class RecipeStepDto(RecipeStepCreateDto):
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
     id: UUID
-    stepNumber: int
+    stepNumber: int = Field(..., validation_alias="step_number")
+    timerMinutes: Optional[int] = Field(None, validation_alias="timer_minutes")
+    imageUrl: Optional[str] = Field(None, validation_alias="image_url")
 
 
 class RecipeIngredientCreateDto(BaseModel):
@@ -43,18 +45,19 @@ class RecipeIngredientDto(RecipeIngredientCreateDto):
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
     id: UUID
+    orderIndex: int = Field(0, validation_alias="order_index")
 
 
 class RecipeImageDto(BaseModel):
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
     id: UUID
-    originalUrl: str
-    mediumUrl: Optional[str] = None
-    thumbnailUrl: Optional[str] = None
-    altText: Optional[str] = None
-    isPrimary: bool = False
-    orderIndex: int = 0
+    originalUrl: str = Field(..., validation_alias="original_url")
+    mediumUrl: Optional[str] = Field(None, validation_alias="medium_url")
+    thumbnailUrl: Optional[str] = Field(None, validation_alias="thumbnail_url")
+    altText: Optional[str] = Field(None, validation_alias="alt_text")
+    isPrimary: bool = Field(False, validation_alias="is_primary")
+    orderIndex: int = Field(0, validation_alias="order_index")
 
 
 class RecipeAuthorDto(BaseModel):

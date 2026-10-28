@@ -97,6 +97,56 @@ class ApiClient {
     }
   }
 
+  upload(endpoint, formData, onProgress) {
+    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+
+    const send = () =>
+      new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url);
+
+        if (this.accessToken) {
+          xhr.setRequestHeader('Authorization', `Bearer ${this.accessToken}`);
+        }
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable && onProgress) {
+            onProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+
+        xhr.onload = () => {
+          let data;
+          try {
+            data = xhr.responseText ? JSON.parse(xhr.responseText) : null;
+          } catch {
+            data = null;
+          }
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(data);
+            return;
+          }
+
+          const error = new Error(data?.detail || data?.title || 'Tải tệp lên thất bại');
+          error.status = xhr.status;
+          error.data = data;
+          reject(error);
+        };
+
+        xhr.onerror = () => reject(new Error('Không thể kết nối tới máy chủ.'));
+        xhr.send(formData);
+      });
+
+    return send().catch(async (error) => {
+      if (error.status !== 401 || !this.refreshToken) throw error;
+
+      const refreshed = await this.tryRefreshToken();
+      if (!refreshed) throw error;
+      return send();
+    });
+  }
+
   get(endpoint, params = {}) {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, val]) => {
