@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useRecipeSeo } from '../hooks/useRecipeSeo';
 import {
   Clock,
   Users,
@@ -96,6 +97,8 @@ export const RecipeDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [checkedIngredients, setCheckedIngredients] = useState({});
+
+  useRecipeSeo(recipe);
 
   useEffect(() => {
     const fetchDetail = async () => {
