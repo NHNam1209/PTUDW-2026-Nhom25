@@ -113,7 +113,6 @@ async def register(
         user_email=new_user.email,
         full_name=new_user.full_name,
     )
-    )
 
     user_dto = UserProfileDto(
         id=new_user.id,
