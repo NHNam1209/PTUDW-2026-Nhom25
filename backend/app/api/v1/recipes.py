@@ -41,6 +41,7 @@ from app.schemas.recipe import (
 )
 from app.services.slug import get_unique_slug
 from app.services.storage import storage_service
+from app.jobs.image_job import generate_and_upload_thumbnail
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from sqlalchemy import and_, asc, desc, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -802,13 +803,29 @@ async def delete_recipe(
 
 
 # -------------------------------------------------------------
+@router.post(
+    "/upload-image",
+    status_code=status.HTTP_201_CREATED,
+    summary="Tải lên hình ảnh đơn lẻ (FR-RCP-008 / CONS-007 / FR-JOB-002)",
+)
+async def upload_standalone_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+):
+    """Upload hình ảnh độc lập lên MinIO S3 Object Storage kèm thumbnail."""
+    content, ext = await storage_service.validate_file(file)
+    uploaded_url = await storage_service.upload_file(file, folder=f"temp/{current_user.id}")
+    thumb_url = await generate_and_upload_thumbnail(content, file.filename or f"img.{ext}")
+    return {"url": uploaded_url, "thumbnailUrl": thumb_url or uploaded_url, "filename": file.filename}
+
+
 # FR-RCP-008: Quản lý Ảnh Công thức (Upload / Set Primary / Delete)
 # -------------------------------------------------------------
 @router.post(
     "/{id}/images",
     response_model=RecipeImageDto,
     status_code=status.HTTP_201_CREATED,
-    summary="Upload ảnh công thức (FR-RCP-008)",
+    summary="Upload ảnh công thức (FR-RCP-008 / FR-JOB-002)",
 )
 async def upload_recipe_image(
     id: UUID,
@@ -833,8 +850,12 @@ async def upload_recipe_image(
 
     _check_recipe_ownership(recipe, current_user)
 
-    # Upload to MinIO
+    # Validate and generate thumbnail (FR-JOB-002)
+    content, ext = await storage_service.validate_file(file)
     uploaded_url = await storage_service.upload_file(file, folder=f"recipes/{id}")
+    thumbnail_url = await generate_and_upload_thumbnail(
+        content, file.filename or f"{uuid.uuid4()}.{ext}"
+    )
 
     # Set as primary if requested or if it's the only image
     should_be_primary = isPrimary or len(recipe.images) == 0
@@ -845,6 +866,7 @@ async def upload_recipe_image(
     new_img = RecipeImage(
         recipe_id=recipe.id,
         original_url=uploaded_url,
+        thumbnail_url=thumbnail_url or uploaded_url,
         alt_text=altText,
         is_primary=should_be_primary,
         order_index=len(recipe.images),

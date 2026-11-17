@@ -5,12 +5,12 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class CategoryBase(BaseModel):
-    name: str = Field(..., min_length=2, max_length=100, example="Món Chính")
+    name: str = Field(..., min_length=2, max_length=100, json_schema_extra={"example": "Món Chính"})
     description: Optional[str] = Field(
-        None, example="Các món ăn chính đậm đà hương vị"
+        None, json_schema_extra={"example": "Các món ăn chính đậm đà hương vị"}
     )
-    imageUrl: Optional[str] = Field(None, example="https://example.com/cat.jpg")
-    orderIndex: int = Field(0, example=1)
+    imageUrl: Optional[str] = Field(None, json_schema_extra={"example": "https://example.com/cat.jpg"})
+    orderIndex: int = Field(0, json_schema_extra={"example": 1})
 
 
 class CategoryCreateDto(CategoryBase):

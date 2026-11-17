@@ -35,6 +35,14 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
+  const loginWithGoogle = async (idToken) => {
+    const data = await api.post('/auth/google', { idToken });
+    api.setTokens(data.accessToken, data.refreshToken);
+    setUser(data.user);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    return data.user;
+  };
+
   const register = async (fullName, email, userName, password) => {
     const data = await api.post('/auth/register', {
       fullName,
@@ -81,6 +89,7 @@ export const AuthProvider = ({ children }) => {
         isAdmin,
         isAuthor,
         login,
+        loginWithGoogle,
         register,
         logout,
         updateProfile,

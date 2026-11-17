@@ -9,6 +9,7 @@ import {
   LogOut,
   LayoutDashboard,
   FolderTree,
+  Users,
   FileText,
   Menu,
   X,
@@ -24,7 +25,7 @@ export const Navbar = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (keyword.trim()) {
-      navigate(`/recipes?q=${encodeURIComponent(keyword.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(keyword.trim())}`);
       setKeyword('');
       setMobileMenuOpen(false);
     }
@@ -83,6 +84,11 @@ export const Navbar = () => {
           <Link to="/categories" style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--secondary)' }}>
             Danh mục
           </Link>
+          {isAuthenticated && (
+            <Link to="/users" style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--secondary)' }}>
+              Người dùng
+            </Link>
+          )}
 
           {/* Action buttons */}
           {isAuthenticated ? (
@@ -166,6 +172,11 @@ export const Navbar = () => {
                         <span>Quản lý danh mục</span>
                       </Link>
                     )}
+
+                    <Link to="/users" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', fontSize: '0.8125rem', borderRadius: '0.375rem' }} className="menu-item">
+                      <Users size={15} />
+                      <span>Danh sách người dùng</span>
+                    </Link>
 
                     <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0.75rem', fontSize: '0.8125rem', borderRadius: '0.375rem' }} className="menu-item">
                       <User size={15} />

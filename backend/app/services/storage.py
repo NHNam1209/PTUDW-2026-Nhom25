@@ -142,6 +142,35 @@ class MinIOStorageService:
         # Fallback / Development URL khi không kết nối được MinIO
         return f"{base_url}/{bucket_name}/{unique_filename}"
 
+    async def upload_bytes(
+        self,
+        data: bytes,
+        filename: str,
+        content_type: str = "image/jpeg",
+        folder: str = "thumbnails",
+    ) -> str:
+        """Upload raw bytes to MinIO and return public URL (FR-FILE-001, FR-JOB-002)."""
+        client = self._get_client()
+        base_url = settings.MINIO_PUBLIC_URL.rstrip("/")
+        bucket_name = settings.MINIO_BUCKET_NAME
+        unique_name = f"{folder}/{filename}"
+
+        if client:
+            try:
+                self._ensure_bucket()
+                client.put_object(
+                    bucket_name=bucket_name,
+                    object_name=unique_name,
+                    data=io.BytesIO(data),
+                    length=len(data),
+                    content_type=content_type,
+                )
+                return f"{base_url}/{bucket_name}/{unique_name}"
+            except Exception as e:
+                logger.error(f"Failed to upload bytes to MinIO: {e}", exc_info=True)
+
+        return f"{base_url}/{bucket_name}/{unique_name}"
+
     async def delete_file(self, file_url: str) -> None:
         """Xóa file trên MinIO dựa theo URL."""
         client = self._get_client()
@@ -171,3 +200,4 @@ class MinIOStorageService:
 
 
 storage_service = MinIOStorageService()
+StorageService = MinIOStorageService

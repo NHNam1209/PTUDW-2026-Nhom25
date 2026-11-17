@@ -4,6 +4,11 @@
 .env.*.local
 *.env
 
+# Logs
+logs/
+*.log
+backend/logs/
+
 # Python
 __pycache__/
 *.py[cod]

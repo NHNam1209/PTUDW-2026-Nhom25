@@ -107,11 +107,12 @@ async def register(
     await db.commit()
     await db.refresh(new_user)
 
-    # 6. TRIGGER BACKGROUND JOB: Gửi email chào mừng chạy ngầm
+    # FR-JOB-001: Trigger background task to send welcome email
     background_tasks.add_task(
         send_welcome_email,
         user_email=new_user.email,
-        full_name=new_user.full_name
+        full_name=new_user.full_name,
+    )
     )
 
     user_dto = UserProfileDto(

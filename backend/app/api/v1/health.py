@@ -75,7 +75,7 @@ async def health(response: Response, db: AsyncSession = Depends(get_db)):
     try:
         r = aioredis.from_url(settings.REDIS_URL, socket_timeout=2.0)
         await r.ping()
-        await r.close()
+        await r.aclose()
         entries["redis"] = {"status": "Healthy"}
     except Exception as e:
         entries["redis"] = {"status": "Degraded", "error": str(e)}

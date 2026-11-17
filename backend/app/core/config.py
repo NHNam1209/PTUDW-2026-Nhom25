@@ -41,6 +41,15 @@ class Settings(BaseSettings):
     # Google OAuth 2.0 (FR-AUTH-003)
     GOOGLE_CLIENT_ID: str = ""
 
+    # SMTP / MailHog (FR-JOB-001)
+    SMTP_SERVER: str = "localhost"
+    SMTP_PORT: int = 1025
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_TLS: bool = False
+    EMAILS_FROM_EMAIL: str = "no-reply@culinaryblog.com"
+    EMAILS_FROM_NAME: str = "Culinary Blog"
+
     # CORS (NFR-SEC-005)
     BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost",

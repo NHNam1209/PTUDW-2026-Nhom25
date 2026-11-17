@@ -18,9 +18,9 @@ class RecipeNutritionDto(BaseModel):
 
 
 class RecipeStepCreateDto(BaseModel):
-    title: str = Field(..., min_length=2, max_length=200, example="Sơ chế nguyên liệu")
-    description: str = Field(..., min_length=5, example="Rửa sạch thịt bò và thái lát mỏng...")
-    timerMinutes: Optional[int] = Field(None, ge=0, example=15)
+    title: str = Field(..., min_length=2, max_length=200, json_schema_extra={"example": "Sơ chế nguyên liệu"})
+    description: str = Field(..., min_length=5, json_schema_extra={"example": "Rửa sạch thịt bò và thái lát mỏng..."})
+    timerMinutes: Optional[int] = Field(None, ge=0, json_schema_extra={"example": 15})
     imageUrl: Optional[str] = None
 
 
@@ -34,11 +34,11 @@ class RecipeStepDto(RecipeStepCreateDto):
 
 
 class RecipeIngredientCreateDto(BaseModel):
-    name: str = Field(..., min_length=1, max_length=200, example="Thịt bò thăn")
-    quantity: Optional[Decimal] = Field(None, ge=0, example=500)
-    unit: Optional[str] = Field(None, max_length=50, example="gram")
-    notes: Optional[str] = Field(None, max_length=500, example="thái mỏng")
-    orderIndex: int = Field(0, example=0)
+    name: str = Field(..., min_length=1, max_length=200, json_schema_extra={"example": "Thịt bò thăn"})
+    quantity: Optional[Decimal] = Field(None, ge=0, json_schema_extra={"example": 500})
+    unit: Optional[str] = Field(None, max_length=50, json_schema_extra={"example": "gram"})
+    notes: Optional[str] = Field(None, max_length=500, json_schema_extra={"example": "thái mỏng"})
+    orderIndex: int = Field(0, json_schema_extra={"example": 0})
 
 
 class RecipeIngredientDto(RecipeIngredientCreateDto):
@@ -106,14 +106,14 @@ class RecipeDetailDto(RecipeSummaryDto):
 
 
 class RecipeCreateDto(BaseModel):
-    title: str = Field(..., min_length=5, max_length=200, example="Phở Bò Gia Truyền")
-    description: str = Field(..., min_length=10, max_length=2000, example="Cách nấu phở bò gia truyền thơm ngon nức mũi...")
+    title: str = Field(..., min_length=5, max_length=200, json_schema_extra={"example": "Phở Bò Gia Truyền"})
+    description: str = Field(..., min_length=10, max_length=2000, json_schema_extra={"example": "Cách nấu phở bò gia truyền thơm ngon nức mũi..."})
     categoryId: UUID
-    prepTimeMinutes: int = Field(..., gt=0, example=30)
-    cookTimeMinutes: int = Field(..., ge=0, example=60)
-    servings: int = Field(..., gt=0, example=4)
-    difficulty: int = Field(1, ge=1, le=4, example=1)
-    instructions: Optional[str] = Field("", example="Hướng dẫn tổng quan...")
+    prepTimeMinutes: int = Field(..., gt=0, json_schema_extra={"example": 30})
+    cookTimeMinutes: int = Field(..., ge=0, json_schema_extra={"example": 60})
+    servings: int = Field(..., gt=0, json_schema_extra={"example": 4})
+    difficulty: int = Field(1, ge=1, le=4, json_schema_extra={"example": 1})
+    instructions: Optional[str] = Field("", json_schema_extra={"example": "Hướng dẫn tổng quan..."})
     nutrition: Optional[RecipeNutritionDto] = None
     steps: Optional[List[RecipeStepCreateDto]] = None
     ingredients: Optional[List[RecipeIngredientCreateDto]] = None

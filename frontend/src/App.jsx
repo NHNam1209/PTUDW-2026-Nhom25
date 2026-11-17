@@ -15,6 +15,9 @@ import { CreatorDashboard } from './pages/CreatorDashboard';
 import { RecipeManagementPage } from './pages/RecipeManagementPage';
 import { RecipeEditorPage } from './pages/RecipeEditorPage';
 import { CategoryManagePage } from './pages/CategoryManagePage';
+import { CategoriesPage } from './pages/CategoriesPage';
+import { SearchPage } from './pages/SearchPage';
+import { UsersPage } from './pages/UsersPage';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
@@ -71,6 +74,9 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/recipes" element={<RecipeListPage />} />
               <Route path="/recipes/:slug" element={<RecipeDetailPage />} />
+              <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/categories/:slug" element={<CategoriesPage />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
@@ -121,6 +127,22 @@ function App() {
                   <AdminRoute>
                     <CategoryManagePage />
                   </AdminRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute>
+                    <UsersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/users"
+                element={
+                  <ProtectedRoute>
+                    <UsersPage />
+                  </ProtectedRoute>
                 }
               />
 

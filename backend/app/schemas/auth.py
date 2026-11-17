@@ -4,27 +4,27 @@ from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 
 class RegisterRequest(BaseModel):
-    fullName: str = Field(..., min_length=2, max_length=100, example="Nguyễn Văn A")
-    email: EmailStr = Field(..., example="user@example.com")
-    userName: str = Field(..., min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_-]+$", example="nguyenvana")
-    password: str = Field(..., min_length=8, example="Admin@123456")
+    fullName: str = Field(..., min_length=2, max_length=100, json_schema_extra={"example": "Nguyễn Văn A"})
+    email: EmailStr = Field(..., json_schema_extra={"example": "user@example.com"})
+    userName: str = Field(..., min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_-]+$", json_schema_extra={"example": "nguyenvana"})
+    password: str = Field(..., min_length=8, json_schema_extra={"example": "Admin@123456"})
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr = Field(..., example="user@example.com")
-    password: str = Field(..., min_length=1, example="Admin@123456")
+    email: EmailStr = Field(..., json_schema_extra={"example": "user@example.com"})
+    password: str = Field(..., min_length=1, json_schema_extra={"example": "Admin@123456"})
 
 
 class GoogleLoginRequest(BaseModel):
-    idToken: str = Field(..., example="eyJhbGciOiJSUzI1NiIs...")
+    idToken: str = Field(..., json_schema_extra={"example": "eyJhbGciOiJSUzI1NiIs..."})
 
 
 class RefreshTokenRequest(BaseModel):
-    refreshToken: str = Field(..., example="dGVzdF9yZWZyZXNoX3Rva2Vu")
+    refreshToken: str = Field(..., json_schema_extra={"example": "dGVzdF9yZWZyZXNoX3Rva2Vu"})
 
 
 class LogoutRequest(BaseModel):
-    refreshToken: str = Field(..., example="dGVzdF9yZWZyZXNoX3Rva2Vu")
+    refreshToken: str = Field(..., json_schema_extra={"example": "dGVzdF9yZWZyZXNoX3Rva2Vu"})
 
 
 class UserProfileDto(BaseModel):

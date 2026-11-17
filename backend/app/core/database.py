@@ -24,6 +24,7 @@ AsyncSessionLocal = async_sessionmaker(
     autocommit=False,
     autoflush=False,
 )
+async_session_maker = AsyncSessionLocal
 
 # Sync Engine (for migrations, scripts and synchronous operations)
 sync_engine = create_engine(
