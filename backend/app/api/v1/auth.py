@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 from typing import Any, List
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, status, Request, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from app.core.database import get_db
@@ -31,6 +31,7 @@ from app.schemas.auth import (
     AuthResponseDto,
 )
 from app.api.deps import get_current_user
+from app.services.email import send_welcome_email
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -44,6 +45,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 async def register(
     req: RegisterRequest,
     request: Request,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ):
     # 1. Validate password strength
@@ -105,6 +107,13 @@ async def register(
     await db.commit()
     await db.refresh(new_user)
 
+    # 6. TRIGGER BACKGROUND JOB: Gửi email chào mừng chạy ngầm
+    background_tasks.add_task(
+        send_welcome_email,
+        user_email=new_user.email,
+        full_name=new_user.full_name
+    )
+
     user_dto = UserProfileDto(
         id=new_user.id,
         fullName=new_user.full_name,
@@ -140,7 +149,6 @@ async def login(
     res = await db.execute(stmt)
     user = res.scalar_one_or_none()
 
-    # Generic error message to prevent User Enumeration Attack (FR-AUTH-002 A1)
     generic_error = "Email hoặc mật khẩu không chính xác."
 
     if not user or not user.password_hash:
@@ -149,7 +157,6 @@ async def login(
             detail=generic_error
         )
 
-    # Check lockout
     if user.is_locked_out():
         remain_sec = int((user.lockout_end - datetime.now(timezone.utc)).total_seconds())
         raise ForbiddenException(
@@ -163,7 +170,6 @@ async def login(
             detail="Tài khoản đã bị vô hiệu hóa."
         )
 
-    # Verify password
     if not verify_password(req.password, user.password_hash):
         user.access_failed_count += 1
         if user.access_failed_count >= 5:
@@ -174,7 +180,6 @@ async def login(
             detail=generic_error
         )
 
-    # Success: reset access failed count
     user.access_failed_count = 0
     user.lockout_end = None
 
@@ -227,7 +232,6 @@ async def google_login(
     request: Request,
     db: AsyncSession = Depends(get_db)
 ):
-    # Verify Google token or parse info
     email = None
     name = None
     picture = None
@@ -238,13 +242,12 @@ async def google_login(
         id_info = id_token.verify_oauth2_token(
             req.idToken,
             google_requests.Request(),
-            audience=None  # Can be restricted via settings.GOOGLE_CLIENT_ID
+            audience=None
         )
         email = id_info.get("email")
         name = id_info.get("name")
         picture = id_info.get("picture")
     except Exception:
-        # Fallback decode if external network is unavailable in test environment
         import jwt as pyjwt
         try:
             unverified = pyjwt.decode(req.idToken, options={"verify_signature": False})
@@ -263,13 +266,11 @@ async def google_login(
             detail="Không trích xuất được email từ Google token."
         )
 
-    # Check existing user
     stmt = select(User).where(User.email == email.lower())
     res = await db.execute(stmt)
     user = res.scalar_one_or_none()
 
     if not user:
-        # Create new user from Google profile
         base_username = email.split("@")[0]
         user_name = base_username
         counter = 1
@@ -357,9 +358,7 @@ async def refresh_token(
             detail="Refresh token không tồn tại hoặc đã hết hạn."
         )
 
-    # Reuse Detection (NFR-SEC-002, FR-AUTH-004 A3)
     if token_record.revoked_at is not None:
-        # Revoke all refresh tokens for this user (paranoid mode)
         await db.execute(
             update(RefreshToken)
             .where(RefreshToken.user_id == token_record.user_id)
@@ -371,7 +370,6 @@ async def refresh_token(
             detail="Refresh token đã bị thu hồi trước đó. Phát hiện nghi vấn tấn công phát lại (Token Reuse Attack)."
         )
 
-    # Check expiration
     if token_record.expires_at < datetime.now(timezone.utc):
         token_record.revoked_at = datetime.now(timezone.utc)
         await db.commit()
@@ -380,7 +378,6 @@ async def refresh_token(
             detail="Refresh token đã hết hạn. Vui lòng đăng nhập lại."
         )
 
-    # Find owner user
     stmt_user = select(User).where(User.id == token_record.user_id)
     res_user = await db.execute(stmt_user)
     user = res_user.scalar_one_or_none()
@@ -391,7 +388,6 @@ async def refresh_token(
             detail="Người dùng sở hữu token không còn hoạt động."
         )
 
-    # Token Rotation: Revoke old token, create new token pair
     raw_new_rt, new_rt_hash, new_rt_expires = generate_refresh_token()
 
     token_record.revoked_at = datetime.now(timezone.utc)
