@@ -1,0 +1,542 @@
+{
+  "generatedAt": "2026-11-20T15:45:25.615Z",
+  "count": 41,
+  "images": [
+    {
+      "dish": "Bún Bò Huế Cay Nồng Chuẩn Vị Cố Đô",
+      "file": "01-bun-bo-hue-cay-nong-chuan-vi-co-do.jpg",
+      "source": "commons",
+      "matchedQuery": "Bún Bò Huế",
+      "sourceTitle": "File:Bún bò Huế.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%BAn%20b%C3%B2%20Hu%E1%BA%BF.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg/1280px-B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "recipes": [
+        "bun-bo-hue-cay-nong-chuan-vi-co-do"
+      ]
+    },
+    {
+      "dish": "Cá Kho Tộ Đậm Đà Bắt Cơm",
+      "file": "02-ca-kho-to-dam-da-bat-com.jpg",
+      "source": "commons",
+      "matchedQuery": "Cá Kho Tộ",
+      "sourceTitle": "File:Cá kho tộ.JPG",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AC%C3%A1%20kho%20t%E1%BB%99.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/C%C3%A1_kho_t%E1%BB%99.JPG/1280px-C%C3%A1_kho_t%E1%BB%99.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "recipes": [
+        "mon-kho-dam-da-recipe-75ce5d4c",
+        "mon-kho-dam-da-recipe-8765d2ec",
+        "mon-kho-dam-da-recipe-63ba08a2"
+      ]
+    },
+    {
+      "dish": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "file": "03-goi-cuon-tom-thit-thanh-mat.jpg",
+      "source": "fallback",
+      "sourceTitle": "Bún Bò Huế Cay Nồng Chuẩn Vị Cố Đô",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%BAn%20b%C3%B2%20Hu%E1%BA%BF.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg/1280px-B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "fallbackFrom": "Bún Bò Huế Cay Nồng Chuẩn Vị Cố Đô",
+      "recipes": [
+        "mon-cuon-goi-recipe-cd494893",
+        "mon-cuon-goi-recipe-63eb074a",
+        "mon-cuon-goi-recipe-d0ebc4aa"
+      ]
+    },
+    {
+      "dish": "Bánh Xèo Giòn Rụm Miền Tây",
+      "file": "04-banh-xeo-gion-rum-mien-tay.jpg",
+      "source": "fallback",
+      "sourceTitle": "Bánh Cuốn Nóng Tráng Chảo",
+      "sourcePage": "https://vi.wikipedia.org/wiki/B%C3%A1nh%20cu%E1%BB%91n",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Banh_cuon.jpg/1280px-Banh_cuon.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "fallbackFrom": "Bánh Cuốn Nóng Tráng Chảo",
+      "recipes": [
+        "banh-truyen-thong-recipe-c9e10da3",
+        "banh-truyen-thong-recipe-c15cd92c",
+        "banh-truyen-thong-recipe-4186d27e"
+      ]
+    },
+    {
+      "dish": "Bún Chả Hà Nội Nướng Than Hoa",
+      "file": "05-bun-cha-ha-noi-nuong-than-hoa.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Bún chả",
+      "sourceTitle": "Bún chả",
+      "sourcePage": "https://vi.wikipedia.org/wiki/B%C3%BAn%20ch%E1%BA%A3",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/B%C3%BAn_ch%E1%BA%A3_Th%E1%BB%A5y_Khu%C3%AA.jpg/1280px-B%C3%BAn_ch%E1%BA%A3_Th%E1%BB%A5y_Khu%C3%AA.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "am-thuc-mien-bac-recipe-948ad9ab",
+        "am-thuc-mien-bac-recipe-30492a14",
+        "am-thuc-mien-bac-recipe-8f7e7b1a"
+      ]
+    },
+    {
+      "dish": "Nước Mắm Chua Ngọt Chấm Nem",
+      "file": "06-nuoc-mam-chua-ngot-cham-nem.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Nước mắm",
+      "sourceTitle": "Nước mắm",
+      "sourcePage": "https://vi.wikipedia.org/wiki/N%C6%B0%E1%BB%9Bc%20m%E1%BA%AFm",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/N%C6%B0%E1%BB%9Bc_m%E1%BA%AFm_Gio_H%E1%BA%A3i_c%E1%BB%A7a_ch%C3%BA_Trong%2C_t%E1%BA%BFt_2018.jpg/1280px-N%C6%B0%E1%BB%9Bc_m%E1%BA%AFm_Gio_H%E1%BA%A3i_c%E1%BB%A7a_ch%C3%BA_Trong%2C_t%E1%BA%BFt_2018.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "nuoc-cham-gia-vi-recipe-02534030",
+        "nuoc-cham-gia-vi-recipe-4c9540b7"
+      ]
+    },
+    {
+      "dish": "Trà Sen Vàng Kem Cheese",
+      "file": "07-tra-sen-vang-kem-cheese.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Trà sen",
+      "sourceTitle": "Trà sen",
+      "sourcePage": "https://vi.wikipedia.org/wiki/Tr%C3%A0%20sen",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Tra_sen_-_Vietnamese_Lotus_Tea.JPG/1280px-Tra_sen_-_Vietnamese_Lotus_Tea.JPG?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "do-uong-tra-thao-moc-recipe-554363cc",
+        "do-uong-tra-thao-moc-recipe-5a96b29d"
+      ]
+    },
+    {
+      "dish": "Xôi Xéo Hà Nội Hành Phi Vàng",
+      "file": "08-xoi-xeo-ha-noi-hanh-phi-vang.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Xôi xéo",
+      "sourceTitle": "Xôi",
+      "sourcePage": "https://vi.wikipedia.org/wiki/X%C3%B4i",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/X%C3%B4i_%C4%91%E1%BB%97_xanh.jpg/1280px-X%C3%B4i_%C4%91%E1%BB%97_xanh.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "diem-tam-sang-recipe-4769e97a",
+        "diem-tam-sang-recipe-bb9af6bc"
+      ]
+    },
+    {
+      "dish": "Chè Bưởi An Giang Giòn Sần Sật",
+      "file": "09-che-buoi-an-giang-gion-san-sat.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Chè bưởi",
+      "sourceTitle": "Chè bưởi",
+      "sourcePage": "https://vi.wikipedia.org/wiki/Ch%C3%A8%20b%C6%B0%E1%BB%9Fi",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Coc_che_buoi.jpeg/1280px-Coc_che_buoi.jpeg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "mon-trang-mieng-recipe-af215349",
+        "mon-trang-mieng-recipe-94ef994e"
+      ]
+    },
+    {
+      "dish": "Gà Rang Muối Giòn Rụm",
+      "file": "10-ga-rang-muoi-gion-rum.jpg",
+      "source": "fallback",
+      "sourceTitle": "Bún Bò Huế Cay Nồng Chuẩn Vị Cố Đô",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%BAn%20b%C3%B2%20Hu%E1%BA%BF.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg/1280px-B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "fallbackFrom": "Bún Bò Huế Cay Nồng Chuẩn Vị Cố Đô",
+      "recipes": [
+        "mon-chien-gion-recipe-573427a8",
+        "mon-chien-gion-recipe-b1ae1865"
+      ]
+    },
+    {
+      "dish": "Ốc Nhồi Thịt Hấp Sả Chấm Gừng",
+      "file": "11-oc-nhoi-thit-hap-sa-cham-gung.jpg",
+      "source": "fallback",
+      "sourceTitle": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%BAn%20b%C3%B2%20Hu%E1%BA%BF.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg/1280px-B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "fallbackFrom": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "recipes": [
+        "mon-khai-vi-recipe-5dd084d6",
+        "mon-khai-vi-recipe-b7538838"
+      ]
+    },
+    {
+      "dish": "Bún Riêu Cua Đồng Thanh Ngọt",
+      "file": "12-bun-rieu-cua-dong-thanh-ngot.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Bún riêu cua",
+      "sourceTitle": "Bún riêu cua",
+      "sourcePage": "https://vi.wikipedia.org/wiki/B%C3%BAn%20ri%C3%AAu%20cua",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/B%C3%BAn_ri%C3%AAu_cua_n%C6%B0%E1%BB%9Bc.jpg/1280px-B%C3%BAn_ri%C3%AAu_cua_n%C6%B0%E1%BB%9Bc.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "am-thuc-mien-bac-recipe-2d85776c",
+        "am-thuc-mien-bac-recipe-604e11c5"
+      ]
+    },
+    {
+      "dish": "Gỏi Ngó Sen Tôm Thịt Chua Ngọt",
+      "file": "13-goi-ngo-sen-tom-thit-chua-ngot.jpg",
+      "source": "fallback",
+      "sourceTitle": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%BAn%20b%C3%B2%20Hu%E1%BA%BF.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg/1280px-B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "fallbackFrom": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "recipes": [
+        "mon-cuon-goi-recipe-3344333e",
+        "mon-cuon-goi-recipe-4619e885"
+      ]
+    },
+    {
+      "dish": "Hủ Tiếu Nam Vang Nước Súp Trong",
+      "file": "14-hu-tieu-nam-vang-nuoc-sup-trong.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Hủ tiếu",
+      "sourceTitle": "Hủ tiếu",
+      "sourcePage": "https://vi.wikipedia.org/wiki/H%E1%BB%A7%20ti%E1%BA%BFu",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/H%E1%BB%A7_t%C3%ADu_Nam_Vang_%28h%E1%BB%A7_t%C3%ADu_t%C3%B4m%29%2C_qu%C3%A1n_C%E1%BA%A7u_Tr%E1%BA%AFng%2C_K%C3%AAnh_n%C6%B0%E1%BB%9Bc_%C4%91en_%281%29.jpg/1280px-H%E1%BB%A7_t%C3%ADu_Nam_Vang_%28h%E1%BB%A7_t%C3%ADu_t%C3%B4m%29%2C_qu%C3%A1n_C%E1%BA%A7u_Tr%E1%BA%AFng%2C_K%C3%AAnh_n%C6%B0%E1%BB%9Bc_%C4%91en_%281%29.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "am-thuc-mien-nam-recipe-454abbbe",
+        "am-thuc-mien-nam-recipe-9d359d38"
+      ]
+    },
+    {
+      "dish": "Bánh Canh Cua Giò Heo",
+      "file": "15-banh-canh-cua-gio-heo.jpg",
+      "source": "fallback",
+      "sourceTitle": "Bún Bò Huế Cay Nồng Chuẩn Vị Cố Đô",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%BAn%20b%C3%B2%20Hu%E1%BA%BF.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg/1280px-B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "fallbackFrom": "Bún Bò Huế Cay Nồng Chuẩn Vị Cố Đô",
+      "recipes": [
+        "mon-chinh-recipe-bad4a4e8",
+        "mon-chinh-recipe-a62b247b"
+      ]
+    },
+    {
+      "dish": "Vịt Nấu Chao Chuẩn Miền Tây",
+      "file": "16-vit-nau-chao-chuan-mien-tay.jpg",
+      "source": "fallback",
+      "sourceTitle": "Hủ Tiếu Nam Vang Nước Súp Trong",
+      "sourcePage": "https://vi.wikipedia.org/wiki/H%E1%BB%A7%20ti%E1%BA%BFu",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/H%E1%BB%A7_t%C3%ADu_Nam_Vang_%28h%E1%BB%A7_t%C3%ADu_t%C3%B4m%29%2C_qu%C3%A1n_C%E1%BA%A7u_Tr%E1%BA%AFng%2C_K%C3%AAnh_n%C6%B0%E1%BB%9Bc_%C4%91en_%281%29.jpg/1280px-H%E1%BB%A7_t%C3%ADu_Nam_Vang_%28h%E1%BB%A7_t%C3%ADu_t%C3%B4m%29%2C_qu%C3%A1n_C%E1%BA%A7u_Tr%E1%BA%AFng%2C_K%C3%AAnh_n%C6%B0%E1%BB%9Bc_%C4%91en_%281%29.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "fallbackFrom": "Hủ Tiếu Nam Vang Nước Súp Trong",
+      "recipes": [
+        "am-thuc-mien-nam-recipe-bd052f90",
+        "am-thuc-mien-nam-recipe-d043f2db"
+      ]
+    },
+    {
+      "dish": "Cơm Chiên Dương Châu Thập Cẩm",
+      "file": "17-com-chien-duong-chau-thap-cam.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Cơm chiên",
+      "sourceTitle": "Cơm chiên",
+      "sourcePage": "https://vi.wikipedia.org/wiki/C%C6%A1m%20chi%C3%AAn",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Fried_rice_with_chicken_%2817234644521%29.jpg/1280px-Fried_rice_with_chicken_%2817234644521%29.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "mon-chinh-recipe-ebbfe3ff",
+        "mon-chinh-recipe-614f3832"
+      ]
+    },
+    {
+      "dish": "Trà Đào Cam Sả Mát Lạnh",
+      "file": "18-tra-dao-cam-sa-mat-lanh.jpg",
+      "source": "fallback",
+      "sourceTitle": "Trà Sen Vàng Kem Cheese",
+      "sourcePage": "https://vi.wikipedia.org/wiki/Tr%C3%A0%20sen",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Tra_sen_-_Vietnamese_Lotus_Tea.JPG/1280px-Tra_sen_-_Vietnamese_Lotus_Tea.JPG?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "fallbackFrom": "Trà Sen Vàng Kem Cheese",
+      "recipes": [
+        "do-uong-tra-thao-moc-recipe-42e82859",
+        "do-uong-tra-thao-moc-recipe-32c450d1"
+      ]
+    },
+    {
+      "dish": "Nước Sốt Chấm Gà Luộc Tiêu Chanh",
+      "file": "19-nuoc-sot-cham-ga-luoc-tieu-chanh.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Nước sốt",
+      "sourceTitle": "Xốt",
+      "sourcePage": "https://vi.wikipedia.org/wiki/X%E1%BB%91t",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/84/Lunch_sauces.jpg/1280px-Lunch_sauces.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "nuoc-cham-gia-vi-recipe-55e91f0b",
+        "nuoc-cham-gia-vi-recipe-23d011ed"
+      ]
+    },
+    {
+      "dish": "Bánh Flan Caramen Mềm Mịn",
+      "file": "20-banh-flan-caramen-mem-min.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Bánh flan",
+      "sourceTitle": "Bánh flan",
+      "sourcePage": "https://vi.wikipedia.org/wiki/B%C3%A1nh%20flan",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Homemade_Flan.jpg/1280px-Homemade_Flan.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "mon-trang-mieng-recipe-0dcd610f",
+        "mon-trang-mieng-recipe-7e1ff875"
+      ]
+    },
+    {
+      "dish": "Cá Hồi Áp Chảo Sốt Cam",
+      "file": "21-ca-hoi-ap-chao-sot-cam.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Cá hồi",
+      "sourceTitle": "Cá hồi",
+      "sourcePage": "https://vi.wikipedia.org/wiki/C%C3%A1%20h%E1%BB%93i",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Salmon_leaping_at_Willamette_Falls.jpg/1280px-Salmon_leaping_at_Willamette_Falls.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "healthy-eat-clean-recipe-b2f0293d",
+        "healthy-eat-clean-recipe-de5483de"
+      ]
+    },
+    {
+      "dish": "Rau Muống Xào Tỏi Xanh Mướt",
+      "file": "22-rau-muong-xao-toi-xanh-muot.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Rau muống xào",
+      "sourceTitle": "Rau muống xào",
+      "sourcePage": "https://vi.wikipedia.org/wiki/Rau%20mu%E1%BB%91ng%20x%C3%A0o",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Tumis_kangkung_Makassar.JPG/1280px-Tumis_kangkung_Makassar.JPG?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "mon-xao-nhanh-recipe-5f3659e6",
+        "mon-xao-nhanh-recipe-5fc80c05"
+      ]
+    },
+    {
+      "dish": "Bún Đậu Mắm Tôm Thập Cẩm",
+      "file": "23-bun-dau-mam-tom-thap-cam.jpg",
+      "source": "fallback",
+      "sourceTitle": "Bún Chả Hà Nội Nướng Than Hoa",
+      "sourcePage": "https://vi.wikipedia.org/wiki/B%C3%BAn%20ch%E1%BA%A3",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/B%C3%BAn_ch%E1%BA%A3_Th%E1%BB%A5y_Khu%C3%AA.jpg/1280px-B%C3%BAn_ch%E1%BA%A3_Th%E1%BB%A5y_Khu%C3%AA.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "fallbackFrom": "Bún Chả Hà Nội Nướng Than Hoa",
+      "recipes": [
+        "am-thuc-mien-bac-recipe-ec29b7ab",
+        "am-thuc-mien-bac-recipe-b6c34415"
+      ]
+    },
+    {
+      "dish": "Thịt Nướng Sa Tế Đậm Vị",
+      "file": "24-thit-nuong-sa-te-dam-vi.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Thịt nướng",
+      "sourceTitle": "Nướng",
+      "sourcePage": "https://vi.wikipedia.org/wiki/N%C6%B0%E1%BB%9Bng",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Grilled_steaks_turned_by_grill_tongs_near_Host%C3%A1kov%2C_Vladislav%2C_T%C5%99eb%C3%AD%C4%8D_District.jpg/1280px-Grilled_steaks_turned_by_grill_tongs_near_Host%C3%A1kov%2C_Vladislav%2C_T%C5%99eb%C3%AD%C4%8D_District.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "mon-nuong-bbq-recipe-5ae1064e",
+        "mon-nuong-bbq-recipe-8cd15413"
+      ]
+    },
+    {
+      "dish": "Lẩu Gà Lá É Phú Yên",
+      "file": "25-lau-ga-la-e-phu-yen.jpg",
+      "source": "commons",
+      "matchedQuery": "Lẩu Gà",
+      "sourceTitle": "File:Newone - lẩu gà, sườn và rượu đinh lăng.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3ANewone%20-%20l%E1%BA%A9u%20g%C3%A0%2C%20s%C6%B0%E1%BB%9Dn%20v%C3%A0%20r%C6%B0%E1%BB%A3u%20%C4%91inh%20l%C4%83ng.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Newone_-_l%E1%BA%A9u_g%C3%A0%2C_s%C6%B0%E1%BB%9Dn_v%C3%A0_r%C6%B0%E1%BB%A3u_%C4%91inh_l%C4%83ng.jpg/1280px-Newone_-_l%E1%BA%A9u_g%C3%A0%2C_s%C6%B0%E1%BB%9Dn_v%C3%A0_r%C6%B0%E1%BB%A3u_%C4%91inh_l%C4%83ng.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "recipes": [
+        "mon-lau-gia-dinh-recipe-6c71228e",
+        "mon-lau-gia-dinh-recipe-aff3204e"
+      ]
+    },
+    {
+      "dish": "Bánh Cuốn Nóng Tráng Chảo",
+      "file": "26-banh-cuon-nong-trang-chao.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Bánh cuốn",
+      "sourceTitle": "Bánh cuốn",
+      "sourcePage": "https://vi.wikipedia.org/wiki/B%C3%A1nh%20cu%E1%BB%91n",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Banh_cuon.jpg/1280px-Banh_cuon.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "diem-tam-sang-recipe-3546b138",
+        "diem-tam-sang-recipe-f519110a"
+      ]
+    },
+    {
+      "dish": "Chả Giò Hải Sản Sốt Mayonnaise",
+      "file": "27-cha-gio-hai-san-sot-mayonnaise.jpg",
+      "source": "fallback",
+      "sourceTitle": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%BAn%20b%C3%B2%20Hu%E1%BA%BF.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg/1280px-B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "fallbackFrom": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "recipes": [
+        "mon-khai-vi-recipe-b7ac705b",
+        "mon-khai-vi-recipe-d8d60a0f"
+      ]
+    },
+    {
+      "dish": "Bò Cuốn Lá Lốt Nướng Chảo",
+      "file": "28-bo-cuon-la-lot-nuong-chao.jpg",
+      "source": "fallback",
+      "sourceTitle": "Thịt Nướng Sa Tế Đậm Vị",
+      "sourcePage": "https://vi.wikipedia.org/wiki/N%C6%B0%E1%BB%9Bng",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Grilled_steaks_turned_by_grill_tongs_near_Host%C3%A1kov%2C_Vladislav%2C_T%C5%99eb%C3%AD%C4%8D_District.jpg/1280px-Grilled_steaks_turned_by_grill_tongs_near_Host%C3%A1kov%2C_Vladislav%2C_T%C5%99eb%C3%AD%C4%8D_District.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "fallbackFrom": "Thịt Nướng Sa Tế Đậm Vị",
+      "recipes": [
+        "mon-nuong-bbq-recipe-64feb4ab",
+        "mon-nuong-bbq-recipe-2c652f8d"
+      ]
+    },
+    {
+      "dish": "Salad Ức Gà Sốt Mè Rang Eat Clean",
+      "file": "29-salad-uc-ga-sot-me-rang-eat-clean.jpg",
+      "source": "fallback",
+      "sourceTitle": "Cá Hồi Áp Chảo Sốt Cam",
+      "sourcePage": "https://vi.wikipedia.org/wiki/C%C3%A1%20h%E1%BB%93i",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Salmon_leaping_at_Willamette_Falls.jpg/1280px-Salmon_leaping_at_Willamette_Falls.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "fallbackFrom": "Cá Hồi Áp Chảo Sốt Cam",
+      "recipes": [
+        "healthy-eat-clean-recipe-fdf1afb4",
+        "healthy-eat-clean-recipe-e60c398b"
+      ]
+    },
+    {
+      "dish": "Canh Cua Rau Đay Mồng Tơi Cà Pháo",
+      "file": "30-canh-cua-rau-day-mong-toi-ca-phao.jpg",
+      "source": "commons",
+      "matchedQuery": "Canh Cua",
+      "sourceTitle": "File:Bánh canh cua.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%A1nh%20canh%20cua.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/B%C3%A1nh_canh_cua.jpg/1280px-B%C3%A1nh_canh_cua.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "recipes": [
+        "mon-canh-sup-recipe-f0027a72",
+        "mon-canh-sup-recipe-cc0569c9"
+      ]
+    },
+    {
+      "dish": "Bánh Mì Kẹp Thịt Nướng Giòn Tan",
+      "file": "31-banh-mi-kep-thit-nuong-gion-tan.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Bánh mì kẹp",
+      "sourceTitle": "Bánh mì kẹp",
+      "sourcePage": "https://vi.wikipedia.org/wiki/B%C3%A1nh%20m%C3%AC%20k%E1%BA%B9p",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Paycocke%27s_House_and_Garden%2C_Coggeshall%2C_tuna_sweetcorn_rocket_sandwich%2C_Essex%2C_England_01.jpg/1280px-Paycocke%27s_House_and_Garden%2C_Coggeshall%2C_tuna_sweetcorn_rocket_sandwich%2C_Essex%2C_England_01.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "diem-tam-sang-recipe-2d32c8cc",
+        "diem-tam-sang-recipe-1187a456"
+      ]
+    },
+    {
+      "dish": "Mì Quảng Tôm Thịt Trứng Cút",
+      "file": "32-mi-quang-tom-thit-trung-cut.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Mì Quảng",
+      "sourceTitle": "Mì Quảng",
+      "sourcePage": "https://vi.wikipedia.org/wiki/M%C3%AC%20Qu%E1%BA%A3ng",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Mi_Quang_1A_Danang.jpg/1280px-Mi_Quang_1A_Danang.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "am-thuc-mien-trung-recipe-a567d982",
+        "am-thuc-mien-trung-recipe-a8585ca0"
+      ]
+    },
+    {
+      "dish": "Cơm Tấm Sườn Bì Chả Sài Gòn",
+      "file": "33-com-tam-suon-bi-cha-sai-gon.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Cơm tấm",
+      "sourceTitle": "Cơm tấm",
+      "sourcePage": "https://vi.wikipedia.org/wiki/C%C6%A1m%20t%E1%BA%A5m",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/C%C6%A1m_T%E1%BA%A5m%2C_Da_Nang%2C_Vietnam.jpg/1280px-C%C6%A1m_T%E1%BA%A5m%2C_Da_Nang%2C_Vietnam.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "am-thuc-mien-nam-recipe-08398201",
+        "am-thuc-mien-nam-recipe-aa482332"
+      ]
+    },
+    {
+      "dish": "Mực Hấp Gừng Hành Tươi",
+      "file": "34-muc-hap-gung-hanh-tuoi.jpg",
+      "source": "commons",
+      "matchedQuery": "Mực Hấp Gừng",
+      "sourceTitle": "File:Mực hấp gừng Đông Hà 1.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AM%E1%BB%B1c%20h%E1%BA%A5p%20g%E1%BB%ABng%20%C4%90%C3%B4ng%20H%C3%A0%201.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/M%E1%BB%B1c_h%E1%BA%A5p_g%E1%BB%ABng_%C4%90%C3%B4ng_H%C3%A0_1.jpg/1280px-M%E1%BB%B1c_h%E1%BA%A5p_g%E1%BB%ABng_%C4%90%C3%B4ng_H%C3%A0_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "recipes": [
+        "hai-san-bien-tuoi-recipe-59a46d3e",
+        "hai-san-bien-tuoi-recipe-86b00e92"
+      ]
+    },
+    {
+      "dish": "Đậu Hũ Tứ Xuyên Cay Tê",
+      "file": "35-dau-hu-tu-xuyen-cay-te.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Đậu hũ",
+      "sourceTitle": "Đậu phụ",
+      "sourcePage": "https://vi.wikipedia.org/wiki/%C4%90%E1%BA%ADu%20ph%E1%BB%A5",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Japanese_SilkyTofu_%28Kinugoshi_Tofu%29.JPG/1280px-Japanese_SilkyTofu_%28Kinugoshi_Tofu%29.JPG?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "mon-chay-thanh-dam-recipe-6e466979",
+        "mon-chay-thanh-dam-recipe-999be091"
+      ]
+    },
+    {
+      "dish": "Chè Hạt Sen Long Nhãn Thanh Nhiệt",
+      "file": "36-che-hat-sen-long-nhan-thanh-nhiet.jpg",
+      "source": "commons",
+      "matchedQuery": "Chè Hạt Sen",
+      "sourceTitle": "File:Lễ hội ẩm thực Cửa Việt th4n2023 đặc sản món chè Huế (chè hạt sen) (1).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AL%E1%BB%85%20h%E1%BB%99i%20%E1%BA%A9m%20th%E1%BB%B1c%20C%E1%BB%ADa%20Vi%E1%BB%87t%20th4n2023%20%C4%91%E1%BA%B7c%20s%E1%BA%A3n%20m%C3%B3n%20ch%C3%A8%20Hu%E1%BA%BF%20(ch%C3%A8%20h%E1%BA%A1t%20sen)%20(1).jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/L%E1%BB%85_h%E1%BB%99i_%E1%BA%A9m_th%E1%BB%B1c_C%E1%BB%ADa_Vi%E1%BB%87t_th4n2023_%C4%91%E1%BA%B7c_s%E1%BA%A3n_m%C3%B3n_ch%C3%A8_Hu%E1%BA%BF_%28ch%C3%A8_h%E1%BA%A1t_sen%29_%281%29.jpg/1280px-L%E1%BB%85_h%E1%BB%99i_%E1%BA%A9m_th%E1%BB%B1c_C%E1%BB%ADa_Vi%E1%BB%87t_th4n2023_%C4%91%E1%BA%B7c_s%E1%BA%A3n_m%C3%B3n_ch%C3%A8_Hu%E1%BA%BF_%28ch%C3%A8_h%E1%BA%A1t_sen%29_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "recipes": [
+        "mon-trang-mieng-recipe-51b1310d",
+        "mon-trang-mieng-recipe-4233d338"
+      ]
+    },
+    {
+      "dish": "Nem Rán Hà Nội Vỏ Giòn",
+      "file": "37-nem-ran-ha-noi-vo-gion.jpg",
+      "source": "fallback",
+      "sourceTitle": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AB%C3%BAn%20b%C3%B2%20Hu%E1%BA%BF.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg/1280px-B%C3%BAn_b%C3%B2_Hu%E1%BA%BF.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "fallbackFrom": "Gỏi Cuốn Tôm Thịt Thanh Mát",
+      "recipes": [
+        "mon-khai-vi-recipe-f75827c4",
+        "mon-khai-vi-recipe-08774591"
+      ]
+    },
+    {
+      "dish": "Thịt Kho Hột Vịt Nước Dừa",
+      "file": "38-thit-kho-hot-vit-nuoc-dua.jpg",
+      "source": "fallback",
+      "sourceTitle": "Cá Kho Tộ Đậm Đà Bắt Cơm",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AC%C3%A1%20kho%20t%E1%BB%99.JPG",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/C%C3%A1_kho_t%E1%BB%99.JPG/1280px-C%C3%A1_kho_t%E1%BB%99.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "fallbackFrom": "Cá Kho Tộ Đậm Đà Bắt Cơm",
+      "recipes": [
+        "mon-kho-dam-da-recipe-06f79db4",
+        "mon-kho-dam-da-recipe-73ff7b2f"
+      ]
+    },
+    {
+      "dish": "Sườn Xào Chua Ngọt Óng Ánh",
+      "file": "39-suon-xao-chua-ngot-ong-anh.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Sườn xào chua ngọt",
+      "sourceTitle": "Heo xào chua ngọt",
+      "sourcePage": "https://vi.wikipedia.org/wiki/Heo%20x%C3%A0o%20chua%20ng%E1%BB%8Dt",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/Sweet_and_sour_pork.jpg/1280px-Sweet_and_sour_pork.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "mon-chinh-recipe-dd1b37eb",
+        "mon-chinh-recipe-424ac812"
+      ]
+    },
+    {
+      "dish": "Gà Hấp Lá Chanh Thơm Lừng",
+      "file": "40-ga-hap-la-chanh-thom-lung.jpg",
+      "source": "commons",
+      "matchedQuery": "Gà Hấp",
+      "sourceTitle": "File:Mẹt gà hấp hương sen.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File%3AM%E1%BA%B9t%20g%C3%A0%20h%E1%BA%A5p%20h%C6%B0%C6%A1ng%20sen.jpg",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/M%E1%BA%B9t_g%C3%A0_h%E1%BA%A5p_h%C6%B0%C6%A1ng_sen.jpg/1280px-M%E1%BA%B9t_g%C3%A0_h%E1%BA%A5p_h%C6%B0%C6%A1ng_sen.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "recipes": [
+        "mon-hap-cach-thuy-recipe-0cf68be3",
+        "mon-hap-cach-thuy-recipe-4da6a320"
+      ]
+    },
+    {
+      "dish": "Bò Lúc Lắc Khoai Tây Chiên",
+      "file": "41-bo-luc-lac-khoai-tay-chien.jpg",
+      "source": "wikipedia",
+      "matchedQuery": "Bò lúc lắc",
+      "sourceTitle": "Bò lúc lắc",
+      "sourcePage": "https://vi.wikipedia.org/wiki/B%C3%B2%20l%C3%BAc%20l%E1%BA%AFc",
+      "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Product_Shots_of_Food-Bo_Luc_Lac.jpg/1280px-Product_Shots_of_Food-Bo_Luc_Lac.jpg?utm_source=vi.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+      "recipes": [
+        "mon-chinh-recipe-b2ad8dae",
+        "mon-chinh-recipe-9bce02e9"
+      ]
+    }
+  ]
+}
