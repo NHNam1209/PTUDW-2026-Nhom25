@@ -328,7 +328,7 @@ def main():
         ("Hình 4.1. Giao diện Trang chủ hệ thống ẩm thực Culinary Blog", "14"),
         ("Hình 4.2. Màn hình duyệt danh sách công thức nấu ăn & bộ lọc đa tiêu chí", "14"),
         ("Hình 4.3. Màn hình chi tiết công thức, định lượng nguyên liệu & bộ đếm hẹn giờ nấu", "15"),
-        ("Hình 4.4. Danh mục khám phá món ăn ẩm thực phong phú (22 danh mục)", "15"),
+        ("Hình 4.4. Danh mục khám phá món ăn ẩm thực phong phú (chuẩn Vào Bếp - Điện Máy Xanh)", "15"),
         ("Hình 4.5. Chi tiết danh mục và danh sách công thức thuộc danh mục", "16"),
         ("Hình 4.6. Kết quả tìm kiếm toàn văn tiếng Việt không dấu (PostgreSQL FTS unaccent)", "16"),
         ("Hình 4.7. Màn hình Đăng nhập hệ thống & Tích hợp đăng nhập nhanh Google OAuth 2.0", "17"),
@@ -480,7 +480,7 @@ def main():
     add_sec_heading(doc, "2.5. Thiết kế Cơ sở dữ liệu quan hệ (PostgreSQL 16)")
     add_body_paragraph(doc, "Cơ sở dữ liệu được thiết kế theo chuẩn dạng chuẩn 3NF, bảo đảm tính toàn vẹn tham chiếu, tối ưu hóa hiệu năng truy vấn cho các nghiệp vụ đọc dữ liệu quy mô lớn:")
     add_bullet(doc, "Lưu trữ thông tin định danh, email (duy nhất), mật khẩu băm Bcrypt, vai trò (Admin, Author, User), trạng thái khóa, số lần đăng nhập thất bại và thời điểm khóa tài khoản.", "Bảng users")
-    add_bullet(doc, "Lưu trữ các phân loại món ăn (22 danh mục chuẩn), tên, slug SEO duy nhất, mô tả và đường dẫn ảnh biểu trưng.", "Bảng categories")
+    add_bullet(doc, "Lưu trữ các phân loại món ăn (12 danh mục thực tế chuẩn Vào Bếp - Điện Máy Xanh), tên, slug SEO duy nhất, mô tả và đường dẫn ảnh biểu trưng.", "Bảng categories")
     add_bullet(doc, "Bảng trung tâm lưu trữ tiêu đề, slug, mô tả, khẩu phần, thời gian chuẩn bị & nấu ăn, độ khó, trạng thái vòng đời (Draft=0, Published=1, Archived=2), trường kiểm soát xung đột đồng thời rowVersion (UUID), và các chỉ số dinh dưỡng (Calories, Protein, Carbs, Fat, Fiber, Sodium).", "Bảng recipes")
     add_bullet(doc, "Lưu trữ chi tiết các thành phần món ăn: tên nguyên liệu, định lượng số học (amount), đơn vị đo (unit) và ghi chú chế biến.", "Bảng recipe_ingredients")
     add_bullet(doc, "Lưu trữ tuần tự các bước nấu: số thứ tự bước (step_number), hướng dẫn chi tiết, và thời gian thực hiện tính bằng phút (timer_minutes).", "Bảng recipe_steps")
@@ -587,7 +587,7 @@ def main():
     add_bullet(doc, "Sao chép mã nguồn từ repository: git clone https://github.com/NHNam1209/PTUDW-2026-Nhom25.git && cd PTUDW-2026-Nhom25", "Bước 1. Clone mã nguồn")
     add_bullet(doc, "Cấu hình biến môi trường: Sao chép tệp .env.example thành .env và giữ nguyên cấu hình cổng chuẩn.", "Bước 2. Cấu hình môi trường")
     add_bullet(doc, "Khởi động toàn bộ container: docker compose up -d --build", "Bước 3. Xây dựng & Chạy Docker")
-    add_bullet(doc, "Nạp dữ liệu mẫu hoàn chỉnh (22 danh mục, 105 công thức mẫu kèm nguyên liệu và hẹn giờ): docker exec -it culinary_api python seed.py", "Bước 4. Seed dữ liệu")
+    add_bullet(doc, "Nạp dữ liệu thật hoàn chỉnh (12 danh mục, 60 công thức thực tế chuẩn Vào Bếp - Điện Máy Xanh kèm đầy đủ nguyên liệu, các bước nấu và hẹn giờ): docker exec -it culinary_api python seed.py", "Bước 4. Seed dữ liệu thật")
     add_bullet(doc, "Chạy bộ kiểm thử tự động xác minh: docker exec -it culinary_api pytest (kết quả 11/11 bài test PASS 100%).", "Bước 5. Kiểm thử hệ thống")
 
     add_sec_heading(doc, "4.2. Hướng dẫn sử dụng cho Độc giả")
@@ -599,7 +599,7 @@ def main():
     add_body_paragraph(doc, "Khi nhấp vào một món ăn bất kỳ, độc giả được dẫn tới trang chi tiết. Tại đây, độc giả có thể tùy chỉnh số khẩu phần ăn để hệ thống tự động tính toán lại khối lượng nguyên liệu tương ứng. Người dùng có thể nhấn nút \"Bắt đầu hẹn giờ\" tại từng bước nấu để đồng hồ đếm ngược kích hoạt, có âm thanh thông báo khi hoàn thành.")
     
     add_figure(doc, "demo_03_recipe_detail.png", "Hình 4.3. Màn hình chi tiết công thức, định lượng nguyên liệu & bộ đếm hẹn giờ nấu")
-    add_figure(doc, "demo_04_categories_overview.png", "Hình 4.4. Danh mục khám phá món ăn ẩm thực phong phú (22 danh mục)")
+    add_figure(doc, "demo_04_categories_overview.png", "Hình 4.4. Danh mục khám phá món ăn ẩm thực phong phú (chuẩn Vào Bếp - Điện Máy Xanh)")
     add_figure(doc, "demo_05_category_detail.png", "Hình 4.5. Chi tiết danh mục và danh sách công thức thuộc danh mục")
     add_figure(doc, "demo_06_search_results.png", "Hình 4.6. Kết quả tìm kiếm toàn văn tiếng Việt không dấu (PostgreSQL FTS unaccent)")
 
@@ -688,7 +688,7 @@ def main():
          "• Hiện thực phân hệ Xác thực bảo mật: Đăng ký, Đăng nhập local, Google OAuth 2.0, JWT Rotation, chống Replay Attack.\n"
          "• Xây dựng phân hệ Công thức (Recipe Module): CRUD, phân trang, lọc đa tiêu chí, chuyển trạng thái vòng đời.\n"
          "• Cài đặt cơ chế kiểm soát xung đột đồng thời Optimistic Concurrency Control (rowVersion UUID).\n"
-         "• Thiết lập hạ tầng Docker Compose, Nginx Gateway, mạng nội bộ và script Seeding 105 công thức mẫu.\n"
+         "• Thiết lập hạ tầng Docker Compose, Nginx Gateway, mạng nội bộ và script Seeding 60 công thức món ăn thật (chuẩn Vào Bếp - Điện Máy Xanh).\n"
          "• Xây dựng bộ Unit & Integration Tests (11 bài test pass 100%).", "100%"),
         
         ("2", "2312584", "Đỗ Duy Biên", "Backend Developer / Data Specialist",
