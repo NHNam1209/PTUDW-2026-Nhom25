@@ -42,6 +42,7 @@ export const RecipeListPage = () => {
           categoryId: currentCategory || undefined,
           difficulty: currentDifficulty ? parseInt(currentDifficulty, 10) : undefined,
           maxCookTime: currentMaxCookTime ? parseInt(currentMaxCookTime, 10) : undefined,
+          q: currentSearch || undefined,
           sort: currentSort,
         });
         setRecipes(res?.items || []);
@@ -55,7 +56,7 @@ export const RecipeListPage = () => {
       }
     };
     fetchRecipes();
-  }, [currentCategory, currentDifficulty, currentMaxCookTime, currentSort, currentPage]);
+  }, [currentCategory, currentDifficulty, currentMaxCookTime, currentSort, currentSearch, currentPage]);
 
   const updateFilters = (newParams) => {
     const updated = new URLSearchParams(searchParams);
@@ -98,8 +99,37 @@ export const RecipeListPage = () => {
         marginBottom: '2.5rem',
         boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', alignItems: 'center' }}>
           
+          {/* Quick Search Input */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.375rem' }}>
+              Tìm kiếm từ khóa
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                placeholder="Nhập tên món ăn..."
+                className="input"
+                defaultValue={currentSearch}
+                key={currentSearch}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    updateFilters({ q: e.target.value.trim() });
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e.target.value.trim() !== currentSearch) {
+                    updateFilters({ q: e.target.value.trim() });
+                  }
+                }}
+                style={{ paddingLeft: '2.25rem', height: '2.625rem', fontSize: '0.8125rem' }}
+              />
+              <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            </div>
+          </div>
+
           {/* Category Select */}
           <div>
             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.375rem' }}>
@@ -177,8 +207,14 @@ export const RecipeListPage = () => {
 
         {/* Active Filters Clear */}
         {(currentCategory || currentDifficulty || currentMaxCookTime || currentSearch) && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
             <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Đang lọc theo:</span>
+            {currentSearch && (
+              <span style={{ backgroundColor: '#fff7ed', color: 'var(--primary)', border: '1px solid #ffedd5', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.25rem 0.625rem', borderRadius: '0.375rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                Từ khóa: "{currentSearch}"
+                <X size={13} style={{ cursor: 'pointer' }} onClick={() => updateFilters({ q: '' })} />
+              </span>
+            )}
             <button
               onClick={() => setSearchParams({})}
               style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 600 }}

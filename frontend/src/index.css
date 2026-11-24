@@ -239,3 +239,14 @@ h1, h2, h3, .serif-title {
   color: #166534;
   border: 1px solid #bbf7d0;
 }
+
+/* Responsive Desktop Search in Navbar */
+.desktop-search {
+  display: flex !important;
+}
+
+@media (max-width: 960px) {
+  .desktop-search {
+    display: none !important;
+  }
+}

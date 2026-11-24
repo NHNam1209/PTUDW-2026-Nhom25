@@ -61,7 +61,7 @@ export const Navbar = () => {
         </Link>
 
         {/* Search Bar - Desktop */}
-        <form onSubmit={handleSearch} style={{ display: 'none', position: 'relative', width: '22rem', maxWidth: '100%' }} className="desktop-search">
+        <form onSubmit={handleSearch} style={{ display: 'flex', position: 'relative', width: '20rem', maxWidth: '100%' }} className="desktop-search">
           <input
             type="text"
             placeholder="Tìm kiếm công thức, nguyên liệu..."

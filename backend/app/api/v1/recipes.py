@@ -43,7 +43,7 @@ from app.services.slug import get_unique_slug
 from app.services.storage import storage_service
 from app.jobs.image_job import generate_and_upload_thumbnail
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
-from sqlalchemy import and_, asc, desc, func, or_, select, text
+from sqlalchemy import and_, asc, case, desc, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -147,6 +147,7 @@ async def get_recipes(
     difficulty: Optional[int] = Query(None, ge=1, le=4),
     maxCookTime: Optional[int] = Query(None, ge=0),
     recipeStatus: Optional[int] = Query(None, ge=0, le=2, description="Lọc theo trạng thái: 0=Draft, 1=Published, 2=Archived"),
+    q: Optional[str] = Query(None, description="Từ khóa tìm kiếm nhanh"),
     mine: bool = Query(False, description="Chỉ trả về công thức của người dùng hiện tại (FR-DASH-002)"),
     sort: str = Query("-createdAt"),
     current_user: Optional[User] = Depends(get_current_user_optional),
@@ -199,6 +200,16 @@ async def get_recipes(
             stmt = stmt.where(Recipe.status == recipeStatus)
 
     # 2. Filters
+    if q and q.strip():
+        q_like = f"%{q.strip()}%"
+        stmt = stmt.where(
+            or_(
+                Recipe.title.ilike(q_like),
+                func.unaccent(Recipe.title).ilike(q_like),
+                Recipe.description.ilike(q_like),
+                func.unaccent(func.coalesce(Recipe.description, "")).ilike(q_like),
+            )
+        )
     if categoryId:
         stmt = stmt.where(Recipe.category_id == categoryId)
     if difficulty:
@@ -288,7 +299,7 @@ async def get_recipes(
 
 
 # -------------------------------------------------------------
-# FR-SRCH-001: Tìm kiếm Full-Text PostgreSQL với tsvector / unaccent
+# FR-SRCH-001: Tìm kiếm Full-Text PostgreSQL với tsvector / unaccent & Ranking
 # -------------------------------------------------------------
 @router.get(
     "/search",
@@ -302,19 +313,75 @@ async def search_recipes(
     pageSize: int = Query(12, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
 ):
+    q_clean = q.strip()
+    if not q_clean:
+        return PagedResult(
+            items=[],
+            meta=PagedMeta(page=page, pageSize=pageSize, total=0, totalPages=0),
+        )
+
+    exact_like = f"%{q_clean}%"
+    prefix_like1 = f"{q_clean} %"
+    prefix_like2 = f"% {q_clean} %"
+    prefix_like3 = f"% {q_clean}"
+
+    ingredient_subquery = (
+        select(1)
+        .where(
+            RecipeIngredient.recipe_id == Recipe.id,
+            RecipeIngredient.is_deleted == False,
+            or_(
+                RecipeIngredient.name.ilike(exact_like),
+                func.unaccent(RecipeIngredient.name).ilike(exact_like),
+            ),
+        )
+        .exists()
+    )
+
+    search_conditions = or_(
+        Recipe.title.ilike(exact_like),
+        func.unaccent(Recipe.title).ilike(exact_like),
+        Recipe.description.ilike(exact_like),
+        func.unaccent(func.coalesce(Recipe.description, "")).ilike(exact_like),
+        ingredient_subquery,
+        func.to_tsvector("simple", func.unaccent(Recipe.title + " " + func.coalesce(Recipe.description, ""))).bool_op("@@")(
+            func.plainto_tsquery("simple", func.unaccent(q_clean))
+        ),
+    )
+
+    relevance_score = (
+        case(
+            (Recipe.title.ilike(exact_like), 100),
+            (
+                or_(
+                    func.unaccent(Recipe.title).ilike(prefix_like1),
+                    func.unaccent(Recipe.title).ilike(prefix_like2),
+                    func.unaccent(Recipe.title).ilike(prefix_like3),
+                ),
+                60,
+            ),
+            (func.unaccent(Recipe.title).ilike(exact_like), 40),
+            (ingredient_subquery, 30),
+            (Recipe.description.ilike(exact_like), 20),
+            (func.unaccent(func.coalesce(Recipe.description, "")).ilike(exact_like), 10),
+            else_=0,
+        )
+        + func.ts_rank(
+            func.to_tsvector("simple", func.unaccent(Recipe.title)),
+            func.plainto_tsquery("simple", func.unaccent(q_clean)),
+        ) * 15
+        + func.ts_rank(
+            func.to_tsvector("simple", func.unaccent(func.coalesce(Recipe.description, ""))),
+            func.plainto_tsquery("simple", func.unaccent(q_clean)),
+        ) * 5
+    )
+
     stmt = (
         select(Recipe)
         .where(
             Recipe.is_deleted == False,
             Recipe.status == RecipeStatus.Published.value,
-            or_(
-                func.to_tsvector("simple", func.unaccent(Recipe.title)).bool_op("@@")(
-                    func.plainto_tsquery("simple", func.unaccent(q))
-                ),
-                func.to_tsvector("simple", func.unaccent(Recipe.description)).bool_op("@@")(
-                    func.plainto_tsquery("simple", func.unaccent(q))
-                ),
-            ),
+            search_conditions,
         )
         .options(
             selectinload(Recipe.category),
@@ -327,7 +394,7 @@ async def search_recipes(
     total_res = await db.execute(count_stmt)
     total_count = total_res.scalar_one()
 
-    stmt = stmt.order_by(desc(Recipe.created_at)).offset((page - 1) * pageSize).limit(pageSize)
+    stmt = stmt.order_by(desc(relevance_score), desc(Recipe.created_at)).offset((page - 1) * pageSize).limit(pageSize)
     result = await db.execute(stmt)
     recipes = result.scalars().all()
 

@@ -12,7 +12,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
-const POPULAR_SEARCHES = ['Phở', 'Bún chả', 'Cơm tấm', 'Bánh mì', 'Gà nướng', 'Salad', 'Thịt kho'];
+const POPULAR_SEARCHES = ['Phở', 'Bún bò', 'Bò sốt vang', 'Cơm tấm', 'Gà bó xôi', 'Lẩu gà', 'Bánh xèo', 'Chè khúc bạch', 'Xôi xéo', 'Cá kho'];
 
 export const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
