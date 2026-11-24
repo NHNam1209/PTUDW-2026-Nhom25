@@ -91,7 +91,11 @@ async def seed_database():
 
             # 90% published, 10% draft for realistic CMS workflow
             status = RecipeStatus.Published if (idx % 10 != 0) else RecipeStatus.Draft
-            diff_enum = RecipeDifficulty(r_data.get("difficulty", 2))
+            raw_diff = r_data.get("difficulty", 2)
+            if isinstance(raw_diff, str):
+                diff_mapping = {"Dễ": 1, "Trung bình": 2, "Khó": 3, "Chuyên gia": 4, "Easy": 1, "Medium": 2, "Hard": 3, "Expert": 4}
+                raw_diff = diff_mapping.get(raw_diff, 2)
+            diff_enum = RecipeDifficulty(raw_diff)
 
             nutr = r_data.get("nutrition", {})
             recipe = Recipe(

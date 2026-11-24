@@ -5747,3 +5747,12 @@ REAL_RECIPES = [
         ]
     }
 ]
+
+# Tích hợp dữ liệu công thức ẩm thực chuyên nghiệp từ CET (Trường Trung cấp Kinh Tế - Du Lịch TP.HCM)
+try:
+    from app.core.cet_recipes_data import CET_CATEGORIES, CET_RECIPES
+    REAL_CATEGORIES.extend(CET_CATEGORIES)
+    REAL_RECIPES.extend(CET_RECIPES)
+except ImportError:
+    pass
+
